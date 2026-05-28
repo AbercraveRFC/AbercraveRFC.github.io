@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abercrave RFC JSON Compiler</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --amber: #f2a000;
+      --amber-soft: #ffd15a;
+      --black: #080808;
+      --panel: #151515;
+      --panel-2: #202020;
+      --line: rgba(255,255,255,.12);
+      --text: #fff;
+      --muted: #c9c9c9;
+      --danger: #7a2424;
+      --success: #245e34;
+    }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--black);
+      color: var(--text);
+      padding: 24px;
+      line-height: 1.45;
+      transition: background .25s ease, color .25s ease;
+    }
+
+    body.light-theme {
+      --black: #f2f2f2;
+      --panel: #ffffff;
+      --panel-2: #eeeeee;
+      --line: rgba(0,0,0,.14);
+      --text: #111;
+      --muted: #555;
+      --amber-soft: #b87400;
+      background: #f2f2f2;
+      color: #111;
+    }
+    header {
+      background: var(--amber);
+      color: #111;
+      border-radius: 0;
+      padding: 10px 24px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    h1 {
+      font-size: clamp(24px, 3vw, 40px);
+      line-height: 1;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .json-load-status {
+      background: rgba(0,0,0,.12);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      color: #111;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      height: 58px;
+      margin-top: 20px;
+    }
+    .form-actions {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 6px;
+    }
+    .form-actions button {
+      width: 100%;
+      min-height: 62px;
+      font-size: 18px;
+    }
+    h2 { font-size: 24px; margin-bottom: 14px; }
+    h3 { font-size: 18px; margin-bottom: 10px; }
+    button, input, textarea, select {
+      font: inherit;
+    }
+    button {
+      border: 1px solid var(--line);
+      background: #2d2d2d;
+      color: white;
+      padding: 11px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    button:hover { background: #444; }
+    body.light-theme button {
+      background: #d8d8d8;
+      color: #111;
+      border-color: rgba(0,0,0,.15);
+    }
+    body.light-theme button:hover { background: #c7c7c7; }
+    body.light-theme .danger { background: #9a3333; color: #fff; }
+    body.light-theme .success { background: #2f7842; color: #fff; }
+    .danger { background: var(--danger); }
+    .danger:hover { background: #963333; }
+    .success { background: var(--success); }
+    .success:hover { background: #2f7842; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(360px, 520px) 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.22);
+    }
+    .toolbar {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      gap: 14px;
+      align-items: end;
+    }
+    .toolbar label {
+      position: relative;
+      gap: 8px;
+      line-height: 1;
+      display: grid;
+      grid-template-rows: 18px 58px;
+      align-items: end;
+    }
+    .toolbar button,
+    .toolbar input[type="file"] {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      align-self: end;
+    }
+    .toolbar button {
+      margin-bottom: 0;
+      height: 58px;
+    }
+    .toolbar input[type="file"] {
+      height: 58px;
+      line-height: 58px;
+      background: #050505;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 22px;
+      padding: 0 16px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+    }
+    .toolbar input[type="file"]::file-selector-button {
+      height: 38px;
+      margin-top: 9px;
+      margin-right: 14px;
+      border: none;
+      border-radius: 12px;
+      padding: 0 16px;
+      background: #f1f1f1;
+      color: #111;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s ease;
+    }
+    .toolbar input[type="file"]::file-selector-button:hover {
+      background: #ffffff;
+    }
+    body.light-theme .toolbar input[type="file"] {
+      background: #ffffff;
+      color: #111;
+      border-color: rgba(0,0,0,.16);
+    }
+    body.light-theme .toolbar input[type="file"]::file-selector-button {
+      background: #d9d9d9;
+      color: #111;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      color: var(--amber-soft);
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .full { grid-column: 1 / -1; }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #0f0f0f;
+      color: white;
+      border-radius: 14px;
+      padding: 12px 13px;
+    }
+    body.light-theme input,
+    body.light-theme textarea,
+    body.light-theme select {
+      background: #f7f7f7;
+      color: #111;
+      border-color: rgba(0,0,0,.16);
+    }
+
+    body.light-theme .preview {
+      background: #d8d8d8;
+      color: #333;
+      border-color: rgba(0,0,0,.18);
+    }
+    textarea { min-height: 92px; resize: vertical; }
+    .preview {
+      grid-column: 1 / -1;
+      min-height: 220px;
+      background: #333;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      color: #d5d5d5;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      overflow: hidden;
+    }
+    .helper { color: var(--muted); font-size: 14px; margin-top: 12px; }
+    .status { color: var(--amber-soft); font-weight: 700; margin-top: 12px; }
+    .unprocessed-row td { background: rgba(242,160,0,.055); }
+    .unprocessed-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(242,160,0,.18);
+      color: var(--amber-soft);
+      font-size: 12px;
+      font-weight: 900;
+      margin-top: 6px;
+    }
+    .metadata-dropdown {
+      margin-bottom: 22px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255,255,255,.035);
+      overflow: hidden;
+    }
+    .metadata-dropdown summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 16px 18px;
+      color: var(--amber-soft);
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .metadata-dropdown summary::-webkit-details-marker { display: none; }
+    .metadata-dropdown summary::after {
+      content: "▼";
+      font-size: 13px;
+      transition: transform .2s ease;
+    }
+    .metadata-dropdown[open] summary::after {
+      transform: rotate(180deg);
+    }
+    .chips-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      padding: 0 16px 16px;
+      margin-bottom: 0;
+    }
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-height: 190px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #2b2b2b;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+    body.light-theme .chip { background: #e6e6e6; }
+    .chip button {
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.08);
+      border: none;
+      font-size: 12px;
+    }
+    .mini-add {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .entries-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .search-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .search-row select {
+      width: auto;
+      min-width: 190px;
+    }
+    .search-row input { min-width: 260px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      overflow: hidden;
+      border-radius: 18px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 10px;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th { background: #222; color: var(--amber-soft); position: sticky; top: 0; z-index: 1; }
+    body.light-theme th { background: #e2e2e2; color: #111; }
+    tr:hover td { background: rgba(255,255,255,.035); }
+    body.light-theme tr:hover td { background: rgba(0,0,0,.04); }
+    .thumb {
+      width: 80px;
+      height: 54px;
+      border-radius: 10px;
+      background: #333;
+      background-size: cover;
+      background-position: center;
+      border: 1px solid var(--line);
+    }
+    .table-wrap { max-height: 640px; overflow: auto; border-radius: 18px; border: 1px solid var(--line); }
+    .actions {
+      width: 74px;
+      min-width: 74px;
+      padding: 0;
+      position: relative;
+      vertical-align: top;
+    }
+
+    .actions-stack {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .actions .small-btn {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .actions .small-btn:first-child {
+      border-top: none;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .actions .small-btn:last-child {
+      border-bottom: none;
+    }
+
+    .season-cell {
+      vertical-align: middle;
+    }
+
+    .season-cell span,
+    .season-cell strong {
+      display: block;
+      line-height: 1.35;
+    }
+    .small-btn {
+      padding: 7px 10px;
+      font-size: 13px;
+      line-height: 1;
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .json-tools {
+      margin-top: 18px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.035);
+    }
+    .advanced-toggle {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      color: var(--amber-soft);
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .advanced-toggle input {
+      width: auto;
+      transform: scale(1.2);
+    }
+    .advanced-warning {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+    .advanced-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+    .json-area {
+      width: 100%;
+      min-height: 180px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      white-space: pre;
+      margin-top: 12px;
+      opacity: .45;
+      filter: grayscale(1);
+      cursor: not-allowed;
+    }
+    .json-area.unlocked {
+      opacity: 1;
+      filter: none;
+      cursor: text;
+      border-color: rgba(242,160,0,.65);
+    }
+    .picker-row {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid var(--line);
+    }
+    .picker-row select {
+      min-height: 44px;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 10px 22px 10px 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .picker-row label {
+      min-width: 0;
+      font-size: 12px;
+      gap: 6px;
+    }
+    .theme-toggle {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid var(--line);
+      background: #2d2d2d;
+      color: white;
+      border-radius: 999px;
+      padding: 12px 18px 12px 12px;
+      box-shadow: 0 12px 35px rgba(0,0,0,.35);
+    }
+    .theme-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      background: #000;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      line-height: 1;
+    }
+    body.light-theme .theme-toggle {
+      background: #d8d8d8;
+      color: #111;
+      box-shadow: 0 12px 35px rgba(0,0,0,.18);
+    }
+    body.light-theme .theme-icon {
+      background: #fff;
+      color: var(--amber);
+    }
+    @media (max-width: 760px) {
+      .picker-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 1050px) {
+      .layout { grid-template-columns: 1fr; }
+      .chips-grid { grid-template-columns: 1fr; }
+      .toolbar { grid-template-columns: 1fr; }
+      .json-load-status { margin-top: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <div>
+        <h1>Abercrave RFC JSON Compiler</h1>
+      </div>
+      <div class="json-load-status" id="jsonLoadStatus">No JSON loaded yet.</div>
+    </div>
+    <div class="toolbar">
+      <label style="color:#111; font-weight:800;">
+        Load photos.json
+        <input type="file" id="jsonInput" accept="application/json,.json" />
+      </label>
+      <button id="downloadJson" type="button">Download photos.json</button>
+      <label style="color:#111; font-weight:800;">
+        Add image folder/files
+        <input type="file" id="bulkImageInput" accept="image/*" multiple webkitdirectory />
+      </label>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="panel">
+      
+      <form id="photoForm" class="form-grid">
+        <div class="preview" id="previewBox">Image Preview</div>
+
+        <label>
+          Pick image to preview/path
+          <input type="file" id="imagePicker" accept="image/*" />
+        </label>
+        <label>
+          Image folder
+          <input id="imageFolder" value="images/" placeholder="images/" />
+        </label>
+        <label class="full">
+          Image path used by website
+          <input id="imageSrc" list="imagePathList" placeholder="images/example-photo.jpg" required />
+        </label>
+
+        <label>
+          Title
+          <input id="title" placeholder="First XV Team Photo" required />
+        </label>
+        <label>
+          Date taken
+          <input id="dateTaken" placeholder="14/09/1987" />
+        </label>
+        <div class="picker-row">
+          <label>
+            Pick known player
+            <select id="knownPeoplePicker"><option value="">Pick player</option></select>
+          </label>
+          <label>
+            Pick known team
+            <select id="knownTeamPicker"><option value="">Pick team</option></select>
+          </label>
+          <label>
+            Pick known event
+            <select id="knownEventPicker"><option value="">Pick event</option></select>
+          </label>
+        </div>
+        <label class="full">
+          Players / people in image
+          <input id="peopleInImage" list="peopleList" placeholder="Alan Morgan, Rhys Griffiths" />
+        </label>
+        <label class="full">
+          Team / teams
+          <input id="teamsPlaying" list="teamList" placeholder="Abercrave First XV vs Abercrave Seconds" />
+        </label>
+        <label>
+          Event
+          <input id="eventName" list="eventList" placeholder="County Cup Final" />
+        </label>
+        <label>
+          Season
+          <select id="year"></select>
+        </label>
+        <label class="full">
+          Notes
+          <textarea id="notes" placeholder="Notes about this photo..."></textarea>
+        </label>
+
+        <input type="hidden" id="editingId" />
+
+        <div class="form-actions full">
+          <button class="success" type="submit" form="photoForm" id="saveBtn">Add Entry</button>
+          <button type="button" id="resetForm">Reset Form</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <details class="metadata-dropdown">
+        <summary>Known metadata lists — players, teams and events</summary>
+        <div class="chips-grid">
+        <div>
+          <h3>Known Players</h3>
+          <div class="mini-add"><input id="newPerson" placeholder="Add player name" /><button type="button" data-add-meta="people">Add</button></div>
+          <div class="chip-list" id="peopleChips"></div>
+        </div>
+        <div>
+          <h3>Known Teams</h3>
+          <div class="mini-add"><input id="newTeam" placeholder="Add team" /><button type="button" data-add-meta="teams">Add</button></div>
+          <div class="chip-list" id="teamChips"></div>
+        </div>
+        <div>
+          <h3>Known Events</h3>
+          <div class="mini-add"><input id="newEvent" placeholder="Add event" /><button type="button" data-add-meta="events">Add</button></div>
+          <div class="chip-list" id="eventChips"></div>
+        </div>
+      </div>
+      </details>
+
+      <div class="entries-header">
+        <h2>Photo Entries</h2>
+        <div class="search-row">
+          <input id="searchInput" placeholder="Search title, players, teams, event, season..." />
+          <select id="sortFilter">
+            <option value="all">Show all entries</option>
+            <option value="needs">Needs metadata first</option>
+            <option value="done">Completed metadata first</option>
+          </select>
+          <span id="countText">0 entries</span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Actions</th>
+              <th>Image</th>
+              <th>Title</th>
+              <th>Date / Season</th>
+              <th>People</th>
+              <th>Teams</th>
+              <th>Event</th>
+            </tr>
+          </thead>
+          <tbody id="entriesBody"></tbody>
+        </table>
+      </div>
+      <div class="json-tools">
+        <label class="advanced-toggle">
+          <input type="checkbox" id="unlockJson" />
+          Advanced: unlock raw JSON editor
+        </label>
+        <p class="advanced-warning">Do not edit this unless you are confident with JSON coding/script structure. Invalid JSON can stop the photo vault from loading correctly.</p>
+        <div class="advanced-actions">
+          <button class="small-btn" type="button" id="applyRawJson">Apply Raw JSON Changes</button>
+          <button class="small-btn" type="button" id="copyJson">Copy JSON</button>
+        </div>
+        <textarea class="json-area" id="jsonOutput" readonly></textarea>
+      </div>
+    </section>
+  </div>
+
+  <datalist id="peopleList"></datalist>
+  <datalist id="teamList"></datalist>
+  <datalist id="eventList"></datalist>
+  <datalist id="imagePathList"></datalist>
+
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark mode">
+    <span class="theme-icon" id="themeIcon">☾</span>
+    <span id="themeText">Dark Mode</span>
+  </button>
+
+  <script>
+    let photos = [];
+    let metadata = {
+      people: [],
+      teams: [],
+      events: [],
+      imagePaths: []
+    };
+
+    const fields = {
+      editingId: document.getElementById("editingId"),
+      imageSrc: document.getElementById("imageSrc"),
+      title: document.getElementById("title"),
+      dateTaken: document.getElementById("dateTaken"),
+      peopleInImage: document.getElementById("peopleInImage"),
+      teamsPlaying: document.getElementById("teamsPlaying"),
+      eventName: document.getElementById("eventName"),
+      year: document.getElementById("year"),
+      notes: document.getElementById("notes")
+    };
+
+    const form = document.getElementById("photoForm");
+    const previewBox = document.getElementById("previewBox");
+    const imagePicker = document.getElementById("imagePicker");
+    const imageFolder = document.getElementById("imageFolder");
+    const entriesBody = document.getElementById("entriesBody");
+    const jsonOutput = document.getElementById("jsonOutput");
+    const statusText = document.getElementById("statusText");
+
+    function setStatus(message) {
+      if (statusText) statusText.textContent = message;
+      if (jsonLoadStatus && message) jsonLoadStatus.textContent = message;
+    }
+    const jsonLoadStatus = document.getElementById("jsonLoadStatus");
+    const countText = document.getElementById("countText");
+    const searchInput = document.getElementById("searchInput");
+    const sortFilter = document.getElementById("sortFilter");
+    const bulkImageInput = document.getElementById("bulkImageInput");
+    const knownPeoplePicker = document.getElementById("knownPeoplePicker");
+    const knownTeamPicker = document.getElementById("knownTeamPicker");
+    const knownEventPicker = document.getElementById("knownEventPicker");
+    const unlockJson = document.getElementById("unlockJson");
+    const applyRawJson = document.getElementById("applyRawJson");
+    const themeToggle = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
+    const themeText = document.getElementById("themeText");
+
+    function populateSeasonOptions() {
+      fields.year.innerHTML = `<option value="">Choose season...</option>`;
+      for (let startYear = 1900; startYear <= 2030; startYear++) {
+        const season = `${startYear}/${startYear + 1}`;
+        const option = document.createElement("option");
+        option.value = season;
+        option.textContent = season;
+        fields.year.appendChild(option);
+      }
+    }
+
+    function splitList(value) {
+      if (Array.isArray(value)) return value.map(String).map(v => v.trim()).filter(Boolean);
+      return String(value || "").replace(/\r?\n/g, ",").split(/,| vs /i).map(v => v.trim()).filter(Boolean);
+    }
+
+    function uniqueSorted(values) {
+      return [...new Set(values.map(v => String(v || "").trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+    }
+
+    function extractPhotoArray(data) {
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.photos)) return data.photos;
+      if (data && Array.isArray(data.images)) return data.images;
+      if (data && Array.isArray(data.entries)) return data.entries;
+      return null;
+    }
+
+    function normalisePhoto(photo) {
+      const dateText = String(photo.dateTaken || photo.date || "");
+      const yearMatch = dateText.match(/[0-9]{4}/);
+      const people = splitList(photo.peopleInImage || photo.players || photo.people || "");
+      const teams = splitList(photo.teamsPlaying || photo.teams || photo.team || "");
+      const eventName = String(photo.event || photo.eventName || photo.subtitle || "").trim();
+      const imagePath = photo.imageSrc || photo.image || photo.file || photo.path || photo.src || "";
+      const rawFileName = imagePath ? imagePath.split("/").pop() : "";
+      const fileTitle = rawFileName ? rawFileName.split(".").slice(0, -1).join(".").replaceAll("-", " ").replaceAll("_", " ") : "Untitled Archive Photo";
+      const hasMetadata = Boolean(photo.processed || photo.dateTaken || photo.date || photo.year || people.length || teams.length || eventName || photo.notes || photo.description);
+
+      return {
+        id: photo.id || `photo_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+        title: photo.title || photo.name || fileTitle,
+        subtitle: photo.subtitle || eventName || "",
+        imageSrc: imagePath,
+        dateTaken: photo.dateTaken || photo.date || "",
+        year: String(photo.year || (yearMatch ? yearMatch[0] : "")).trim(),
+        peopleInImage: people.join(", "),
+        teamsPlaying: teams.join(" vs "),
+        event: eventName,
+        notes: photo.notes || photo.description || "",
+        processed: hasMetadata
+      };
+    }
+
+    function isPhotoProcessed(photo) {
+      return Boolean(photo.processed || photo.peopleInImage || photo.teamsPlaying || photo.event || photo.notes || photo.dateTaken || photo.year);
+    }
+
+    function rebuildMetadataFromPhotos() {
+      metadata.people = uniqueSorted([...metadata.people, ...photos.flatMap(p => splitList(p.peopleInImage))]);
+      metadata.teams = uniqueSorted([...metadata.teams, ...photos.flatMap(p => splitList(p.teamsPlaying))]);
+      metadata.events = uniqueSorted([...metadata.events, ...photos.map(p => p.event)]);
+      metadata.imagePaths = uniqueSorted([...metadata.imagePaths, ...photos.map(p => p.imageSrc)]);
+    }
+
+    function updateDatalist(id, values) {
+      document.getElementById(id).innerHTML = values.map(value => `<option value="${escapeHtml(value)}"></option>`).join("");
+    }
+
+    function updatePicker(selectElement, values, placeholder) {
+      const previousValue = selectElement.value;
+      selectElement.innerHTML = `<option value="">${placeholder}</option>` + values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");
+      selectElement.value = values.includes(previousValue) ? previousValue : "";
+    }
+
+    function appendToCommaField(field, value) {
+      if (!value) return;
+      const existing = splitList(field.value);
+      if (!existing.some(item => item.toLowerCase() === value.toLowerCase())) existing.push(value);
+      field.value = existing.join(", ");
+    }
+
+    function appendToVsField(field, value) {
+      if (!value) return;
+      const existing = splitList(field.value);
+      if (!existing.some(item => item.toLowerCase() === value.toLowerCase())) existing.push(value);
+      field.value = existing.join(" vs ");
+    }
+
+    function renderChips(listId, values, key) {
+      document.getElementById(listId).innerHTML = values.map(value => `
+        <span class="chip">
+          <span>${escapeHtml(value)}</span>
+          <button type="button" data-edit-meta="${key}" data-value="${escapeHtml(value)}">✎</button>
+          <button type="button" data-delete-meta="${key}" data-value="${escapeHtml(value)}">×</button>
+        </span>
+      `).join("") || `<p class="helper">No items yet.</p>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[char]));
+    }
+
+    function updatePreview(path = fields.imageSrc.value) {
+      if (!path) {
+        previewBox.style.backgroundImage = "";
+        previewBox.textContent = "Image Preview";
+        return;
+      }
+      previewBox.style.backgroundImage = `url('${path}')`;
+      previewBox.textContent = "";
+    }
+
+    function render() {
+      rebuildMetadataFromPhotos();
+      updateDatalist("peopleList", metadata.people);
+      updateDatalist("teamList", metadata.teams);
+      updateDatalist("eventList", metadata.events);
+      updateDatalist("imagePathList", metadata.imagePaths);
+      updatePicker(knownPeoplePicker, metadata.people, "Pick player");
+      updatePicker(knownTeamPicker, metadata.teams, "Pick team");
+      updatePicker(knownEventPicker, metadata.events, "Pick event");
+      renderChips("peopleChips", metadata.people, "people");
+      renderChips("teamChips", metadata.teams, "teams");
+      renderChips("eventChips", metadata.events, "events");
+
+      const q = searchInput.value.toLowerCase().trim();
+      let filtered = photos.filter(photo => JSON.stringify(photo).toLowerCase().includes(q));
+
+      if (sortFilter.value === "needs") {
+        filtered = [...filtered].sort((a, b) => Number(isPhotoProcessed(a)) - Number(isPhotoProcessed(b)));
+      }
+
+      if (sortFilter.value === "done") {
+        filtered = [...filtered].sort((a, b) => Number(isPhotoProcessed(b)) - Number(isPhotoProcessed(a)));
+      }
+      countText.textContent = `${filtered.length} of ${photos.length} entries`;
+
+      entriesBody.innerHTML = filtered.map(photo => `
+        <tr class="${isPhotoProcessed(photo) ? "" : "unprocessed-row"}">
+          <td class="actions">
+            <div class="actions-stack">
+              <button class="small-btn" type="button" data-edit-photo="${photo.id}">Edit</button>
+              <button class="small-btn danger" type="button" data-delete-photo="${photo.id}">Delete</button>
+            </div>
+          </td>
+          <td><div class="thumb" style="background-image:url('${escapeHtml(photo.imageSrc)}')"></div></td>
+          <td>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <strong>${escapeHtml(photo.title)}</strong>
+              <span class="helper">${escapeHtml(photo.imageSrc)}</span>
+              ${isPhotoProcessed(photo) ? "" : "<span class='unprocessed-pill'>Needs metadata</span>"}
+            </div>
+          </td>
+          <td class="season-cell"><span>${escapeHtml(photo.dateTaken)}</span><strong>${escapeHtml(photo.year)}</strong></td>
+          <td>${escapeHtml(photo.peopleInImage)}</td>
+          <td>${escapeHtml(photo.teamsPlaying)}</td>
+          <td>${escapeHtml(photo.event)}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="7">No entries match.</td></tr>`;
+
+      if (!unlockJson.checked) jsonOutput.value = JSON.stringify(photos, null, 2);
+    }
+
+    function resetForm() {
+      form.reset();
+      fields.editingId.value = "";
+      document.getElementById("saveBtn").textContent = "Add Entry";
+      imageFolder.value = "images/";
+      updatePreview("");
+    }
+
+    imagePicker.addEventListener("change", () => {
+      const file = imagePicker.files && imagePicker.files[0];
+      if (!file) return;
+      const folder = imageFolder.value.trim() || "images/";
+      const cleanFolder = folder.endsWith("/") ? folder : folder + "/";
+      const cleanFileName = file.name.split(" ").join("-");
+      fields.imageSrc.value = cleanFolder + cleanFileName;
+      previewBox.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
+      previewBox.textContent = "";
+    });
+
+    fields.imageSrc.addEventListener("input", () => updatePreview());
+    searchInput.addEventListener("input", render);
+    sortFilter.addEventListener("change", render);
+
+    bulkImageInput.addEventListener("change", () => {
+      const files = Array.from(bulkImageInput.files || []).filter(file => file.type.startsWith("image/"));
+      if (!files.length) return;
+
+      const existingPaths = new Set(photos.map(photo => String(photo.imageSrc || "").toLowerCase()));
+      const newEntries = [];
+
+      files.forEach(file => {
+        const relativePath = file.webkitRelativePath || file.name;
+        const parts = relativePath.split("/");
+        const originalFileName = parts.pop();
+        const cleanFileName = originalFileName.split(" ").join("-");
+        const folderParts = parts.filter(part => part && part.toLowerCase() !== "images");
+        const imagePath = ["images", ...folderParts, cleanFileName].join("/");
+
+        if (existingPaths.has(imagePath.toLowerCase())) return;
+        existingPaths.add(imagePath.toLowerCase());
+
+        newEntries.push(normalisePhoto({
+          id: `photo_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+          imageSrc: imagePath,
+          processed: false
+        }));
+      });
+
+      photos = [...newEntries, ...photos];
+      render();
+      setStatus(`Added ${newEntries.length} new image entr${newEntries.length === 1 ? "y" : "ies"}. Fill their metadata, then download photos.json.`);
+      bulkImageInput.value = "";
+    });
+
+    knownPeoplePicker.addEventListener("change", () => {
+      appendToCommaField(fields.peopleInImage, knownPeoplePicker.value);
+      knownPeoplePicker.value = "";
+    });
+
+    knownTeamPicker.addEventListener("change", () => {
+      appendToVsField(fields.teamsPlaying, knownTeamPicker.value);
+      knownTeamPicker.value = "";
+    });
+
+    knownEventPicker.addEventListener("change", () => {
+      if (knownEventPicker.value) fields.eventName.value = knownEventPicker.value;
+      knownEventPicker.value = "";
+    });
+
+    unlockJson.addEventListener("change", () => {
+      jsonOutput.readOnly = !unlockJson.checked;
+      jsonOutput.classList.toggle("unlocked", unlockJson.checked);
+      if (!unlockJson.checked) jsonOutput.value = JSON.stringify(photos, null, 2);
+    });
+
+    applyRawJson.addEventListener("click", () => {
+      if (!unlockJson.checked) {
+        alert("Tick the advanced JSON editor box first.");
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(jsonOutput.value);
+        const photoArray = extractPhotoArray(parsed);
+        if (!photoArray) throw new Error("JSON must be an array of photo entries, or an object containing a photos array.");
+        photos = photoArray.map(normalisePhoto);
+        metadata = { people: [], teams: [], events: [], imagePaths: [] };
+        unlockJson.checked = false;
+        jsonOutput.readOnly = true;
+        jsonOutput.classList.remove("unlocked");
+        render();
+        setStatus("Raw JSON changes applied.");
+      } catch (error) {
+        alert("That JSON is invalid. Changes were not applied.");
+        console.error(error);
+      }
+    });
+    document.getElementById("resetForm").addEventListener("click", resetForm);
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      const id = fields.editingId.value || `photo_${Date.now()}`;
+      const photo = normalisePhoto({
+        id,
+        processed: true,
+        title: fields.title.value,
+        imageSrc: fields.imageSrc.value,
+        dateTaken: fields.dateTaken.value,
+        year: fields.year.value,
+        peopleInImage: fields.peopleInImage.value,
+        teamsPlaying: fields.teamsPlaying.value,
+        event: fields.eventName.value,
+        notes: fields.notes.value
+      });
+
+      const existingIndex = photos.findIndex(item => item.id === id);
+
+      if (existingIndex >= 0) {
+        photos[existingIndex] = photo;
+      } else {
+        photos.unshift(photo);
+      }
+
+      resetForm();
+      render();
+      render();
+
+      document.getElementById("saveBtn").textContent = "Add Entry";
+    });
+
+    entriesBody.addEventListener("click", event => {
+      const editButton = event.target.closest("[data-edit-photo]");
+      const deleteButton = event.target.closest("[data-delete-photo]");
+
+      if (editButton) {
+        const photo = photos.find(item => item.id === editButton.dataset.editPhoto);
+        if (!photo) return;
+        fields.editingId.value = photo.id;
+        fields.imageSrc.value = photo.imageSrc;
+        fields.title.value = photo.title;
+        fields.dateTaken.value = photo.dateTaken;
+        fields.peopleInImage.value = photo.peopleInImage;
+        fields.teamsPlaying.value = photo.teamsPlaying;
+        fields.eventName.value = photo.event;
+        fields.year.value = photo.year;
+        fields.notes.value = photo.notes;
+        document.getElementById("saveBtn").textContent = "Save Data";
+        updatePreview(photo.imageSrc);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      if (deleteButton) {
+        if (!confirm("Delete this photo metadata entry?")) return;
+        photos = photos.filter(item => item.id !== deleteButton.dataset.deletePhoto);
+        render();
+      }
+    });
+
+    document.body.addEventListener("click", event => {
+      const addButton = event.target.closest("[data-add-meta]");
+      const editButton = event.target.closest("[data-edit-meta]");
+      const deleteButton = event.target.closest("[data-delete-meta]");
+
+      if (addButton) {
+        const key = addButton.dataset.addMeta;
+        const input = key === "people" ? document.getElementById("newPerson") : key === "teams" ? document.getElementById("newTeam") : document.getElementById("newEvent");
+        const value = input.value.trim();
+        if (!value) return;
+        metadata[key] = uniqueSorted([...metadata[key], value]);
+        input.value = "";
+        render();
+      }
+
+      if (editButton) {
+        const key = editButton.dataset.editMeta;
+        const oldValue = editButton.dataset.value;
+        const newValue = prompt("Rename this metadata item:", oldValue);
+        if (!newValue || newValue === oldValue) return;
+        metadata[key] = uniqueSorted(metadata[key].map(value => value === oldValue ? newValue : value));
+        photos = photos.map(photo => renameMetadataInPhoto(photo, key, oldValue, newValue));
+        render();
+      }
+
+      if (deleteButton) {
+        const key = deleteButton.dataset.deleteMeta;
+        const value = deleteButton.dataset.value;
+        if (!confirm(`Remove '${value}' from the known ${key} list? This will not delete photo entries.`)) return;
+        metadata[key] = metadata[key].filter(item => item !== value);
+        render();
+      }
+    });
+
+    function renameMetadataInPhoto(photo, key, oldValue, newValue) {
+      const replaceInList = value => splitList(value).map(item => item === oldValue ? newValue : item);
+      if (key === "people") return { ...photo, peopleInImage: replaceInList(photo.peopleInImage).join(", ") };
+      if (key === "teams") return { ...photo, teamsPlaying: replaceInList(photo.teamsPlaying).join(" vs ") };
+      if (key === "events" && photo.event === oldValue) return { ...photo, event: newValue, subtitle: photo.subtitle === oldValue ? newValue : photo.subtitle };
+      return photo;
+    }
+
+    document.getElementById("jsonInput").addEventListener("change", () => {
+      const file = document.getElementById("jsonInput").files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = event => {
+        try {
+          const data = JSON.parse(event.target.result);
+          const photoArray = extractPhotoArray(data);
+          if (!photoArray) throw new Error("JSON must be an array, or an object with a photos array.");
+          photos = photoArray.map(normalisePhoto);
+          metadata = { people: [], teams: [], events: [], imagePaths: [] };
+          render();
+          setStatus(`${file.name} loaded • ${photos.length} entries`);
+        } catch (error) {
+          alert("Could not load JSON. It must be either a valid array of photo objects, or an object containing a photos array.");
+          console.error(error);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById("downloadJson").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(photos, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "photos.json";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setStatus("Downloaded photos.json.");
+    });
+
+    document.getElementById("copyJson").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(JSON.stringify(photos, null, 2));
+      setStatus("JSON copied to clipboard.");
+    });
+
+    populateSeasonOptions();
+    render();
+
+    function applyTheme(theme) {
+      const isLight = theme === "light";
+      document.body.classList.toggle("light-theme", isLight);
+      themeIcon.textContent = isLight ? "☀" : "☾";
+      themeText.textContent = isLight ? "Light Mode" : "Dark Mode";
+      localStorage.setItem("abercraveCompilerTheme", theme);
+    }
+
+    themeToggle.addEventListener("click", () => {
+      applyTheme(document.body.classList.contains("light-theme") ? "dark" : "light");
+    });
+
+    applyTheme(localStorage.getItem("abercraveCompilerTheme") || "dark");
+  </script>
+</body>
+</html>

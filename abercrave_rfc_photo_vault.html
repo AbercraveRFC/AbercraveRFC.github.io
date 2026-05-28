@@ -1,0 +1,3704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abercrave RFC Photo Vault</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --amber: #f2a000;
+      --amber-soft: #ffd15a;
+      --red: #d90000;
+      --red-soft: #ff4040;
+      --black: #050505;
+      --dark-grey: #171717;
+      --mid-grey: #3a3a3a;
+      --soft-grey: #8d8d8d;
+      --light-grey: #e7e7e7;
+      --white: #ffffff;
+      --top-height: 360px;
+      --top-height-scrolled: 135px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: calc(var(--top-height-scrolled) + 30px);
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--black);
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    body.light-theme {
+      background: #f4f4f4;
+      color: #151515;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--top-height);
+      background-color: #050505;
+      background-image: url('670500955_2784521115234640_6769598679961381029_n.jpg');
+      background-size: cover;
+      background-position: center 38%;
+      background-repeat: no-repeat;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      transition: height 0.24s cubic-bezier(.22,.61,.36,1), background-position 0.24s cubic-bezier(.22,.61,.36,1), box-shadow 0.24s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 120px;
+      z-index: 20;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    body.header-scrolled .top-bar {
+      height: var(--top-height-scrolled);
+      background-position: center 44%;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.72);
+    }
+
+    .top-bar::before,
+    .top-bar::after {
+      display: flex;
+    }
+
+    .top-bar-content {
+      position: absolute;
+      left: 50%;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: nowrap;
+      transform: translateX(-50%) scale(1);
+      transform-origin: center center;
+      transition: transform 0.24s cubic-bezier(.22,.61,.36,1);
+      will-change: transform;
+    }
+
+    body.header-scrolled .top-bar-content {
+      transform: translateX(-50%) scale(0.62);
+    }
+
+    .top-bar-logo {
+      width: clamp(90px, 8vw, 125px);
+      height: auto;
+      object-fit: contain;
+      display: block;
+      position: relative;
+      z-index: 2;
+      filter:
+        drop-shadow(0 10px 24px rgba(0,0,0,0.92))
+        drop-shadow(0 4px 10px rgba(0,0,0,0.78))
+        drop-shadow(0 0 20px rgba(0,0,0,0.65));
+    }
+
+    .top-bar-logo::before {
+      content: "";
+      position: absolute;
+      inset: -18px;
+      background: radial-gradient(circle, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.18) 48%, transparent 78%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .top-bar h1 {
+      position: relative;
+      z-index: 3;
+      font-size: clamp(42px, 5vw, 72px);
+      letter-spacing: 1px;
+      font-weight: 800;
+      text-align: center;
+      color: var(--white);
+      white-space: nowrap;
+      will-change: transform;
+      text-shadow:
+        -2px -2px 0 rgba(0,0,0,0.9),
+         2px -2px 0 rgba(0,0,0,0.9),
+        -2px  2px 0 rgba(0,0,0,0.9),
+         2px  2px 0 rgba(0,0,0,0.9),
+         0  5px 12px rgba(0,0,0,0.85),
+         0  0 10px rgba(0,0,0,0.75);
+    }
+    body.header-scrolled .top-bar h1 {
+      text-shadow:
+        -2px -2px 0 rgba(0,0,0,0.92),
+         2px -2px 0 rgba(0,0,0,0.92),
+        -2px  2px 0 rgba(0,0,0,0.92),
+         2px  2px 0 rgba(0,0,0,0.92),
+         0  4px 10px rgba(0,0,0,0.9),
+         0  0 8px rgba(0,0,0,0.78);
+    }
+
+    .sidebar {
+      position: fixed;
+      top: var(--top-height);
+      left: 0;
+      bottom: 0;
+      width: 250px;
+      padding: 18px 14px;
+      background: rgba(10, 10, 10, 0.94);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      z-index: 15;
+      display: flex;
+      flex-direction: column;
+      transition: top 0.24s cubic-bezier(.22,.61,.36,1), width 0.3s ease, padding 0.3s ease, background 0.25s ease, border-color 0.25s ease;
+    }
+
+    body.header-scrolled .sidebar {
+      top: var(--top-height-scrolled);
+    }
+
+    body.light-theme .sidebar {
+      background: rgba(238, 238, 238, 0.96);
+      border-right: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .sidebar.collapsed {
+      width: 86px;
+      padding-left: 8px;
+      padding-right: 8px;
+      align-items: center;
+    }
+
+    .collapse-btn {
+      width: 100%;
+      height: 68px;
+      border: none;
+      border-radius: 22px;
+      background: #2d2d2d;
+      color: #ffffff;
+      font-size: 34px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      transition: width 0.3s ease, height 0.3s ease, border-radius 0.3s ease, background 0.2s ease, color 0.2s ease;
+    }
+
+    .collapse-btn:hover,
+    .theme-toggle:hover {
+      background: #444;
+    }
+
+    body.light-theme .collapse-btn,
+    body.light-theme .theme-toggle {
+      background: #d8d8d8;
+      color: #151515;
+    }
+
+    .nav-link {
+      width: 100%;
+      min-height: 68px;
+      margin-bottom: 10px;
+      padding: 8px 18px;
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: #ffffff;
+      text-decoration: none;
+      transition: width 0.3s ease, height 0.3s ease, padding 0.3s ease, gap 0.3s ease, border-radius 0.3s ease, background 0.2s ease, color 0.2s ease;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: #303030;
+    }
+
+    body.light-theme .nav-link {
+      color: #151515;
+    }
+
+    body.light-theme .nav-link:hover,
+    body.light-theme .nav-link.active {
+      background: #d8d8d8;
+    }
+
+    .icon-placeholder {
+      min-width: 52px;
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      background: #9a9a9a;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+      transition: width 0.3s ease, height 0.3s ease, min-width 0.3s ease, border-radius 0.3s ease, font-size 0.3s ease, background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .nav-text,
+    .theme-text {
+      opacity: 1;
+      max-width: 150px;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: opacity 0.22s ease, max-width 0.3s ease;
+      font-size: 17px;
+    }
+
+    .sidebar.collapsed .nav-link {
+      width: 68px;
+      height: 68px;
+      min-height: 68px;
+      padding: 8px;
+      justify-content: center;
+      gap: 0;
+      border-radius: 22px;
+    }
+
+    .sidebar.collapsed .collapse-btn {
+      width: 68px;
+      height: 68px;
+      border-radius: 22px;
+    }
+
+    .sidebar.collapsed .icon-placeholder {
+      min-width: 52px;
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      font-size: 18px;
+    }
+
+    .sidebar.collapsed .nav-text,
+    .sidebar.collapsed .theme-text {
+      opacity: 0;
+      max-width: 0;
+    }
+
+    .sidebar-bottom {
+      width: 100%;
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .theme-toggle {
+      width: 100%;
+      min-height: 68px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 22px;
+      padding: 8px 18px;
+      background: #2d2d2d;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: width 0.3s ease, height 0.3s ease, padding 0.3s ease, gap 0.3s ease, border-radius 0.3s ease, background 0.2s ease, color 0.2s ease;
+    }
+
+    .sidebar.collapsed .sidebar-bottom {
+      width: 68px;
+    }
+
+    .sidebar.collapsed .theme-toggle {
+      width: 68px;
+      height: 68px;
+      min-height: 68px;
+      padding: 8px;
+      justify-content: center;
+      gap: 0;
+      border-radius: 22px;
+    }
+
+    .theme-icon {
+      min-width: 52px;
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000000;
+      color: #ffffff;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .mobile-settings-toggle,
+    .mobile-settings-menu {
+      display: none;
+    }
+
+    body.light-theme .theme-icon {
+      background: #ffffff;
+      color: var(--amber);
+    }
+
+    .theme-icon-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: skySwipeIn 0.5s cubic-bezier(.22,.61,.36,1) both;
+    }
+
+    .theme-icon-inner svg,
+    .theme-icon-inner span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: translateY(-1px);
+    }
+
+    .theme-icon-inner.sky-swipe-out {
+      animation: skySwipeOut 0.28s cubic-bezier(.55,.05,.67,.19) both;
+    }
+
+    @keyframes skySwipeOut {
+      to { transform: translateX(38px) translateY(-16px) rotate(35deg); opacity: 0; }
+    }
+
+    @keyframes skySwipeIn {
+      from { transform: translateX(-38px) translateY(16px) rotate(-35deg); opacity: 0; }
+      to { transform: translateX(0) translateY(0) rotate(0deg); opacity: 1; }
+    }
+
+    .main-content {
+      margin-left: 250px;
+      padding: calc(var(--top-height) + 30px) 30px 60px;
+      transition: margin-left 0.3s ease, padding 0.35s ease;
+    }
+
+
+    .main-content.expanded {
+      margin-left: 86px;
+    }
+
+    .section {
+      position: relative;
+      min-height: calc(100vh - 320px);
+      padding: 28px;
+      margin-bottom: 38px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+      scroll-margin-top: calc(var(--top-height-scrolled) + 25px);
+      transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    body.light-theme .section {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: none;
+    }
+
+    .home-section {
+      min-height: auto;
+      padding-bottom: 42px;
+    }
+
+    .home-copy {
+      color: #c9c9c9 !important;
+    }
+
+    body.light-theme .home-copy {
+      color: #444 !important;
+    }
+
+    .section-header {
+      position: relative;
+      display: flex;
+      overflow: visible;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 18px;
+      margin: -10px 0 28px 0;
+      padding: 16px 24px;
+      min-height: 96px;
+      background: var(--amber);
+      border-radius: 999px;
+      border-bottom: 1px solid rgba(0,0,0,0.18);
+      flex-wrap: nowrap;
+    }
+
+    .section-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      pointer-events: none;
+      width: min(720px, 55%);
+    }
+
+    .section-title h2 {
+      font-size: clamp(34px, 3vw, 46px);
+      margin-bottom: 0;
+      color: #111;
+      line-height: 1;
+    }
+
+    .section-title p {
+      display: none;
+    }
+
+    .controls {
+      margin-left: auto;
+      position: relative;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      min-height: 58px;
+    }
+
+    .sort-btn {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: #2d2d2d;
+      color: white;
+      padding: 11px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      transition: opacity 0.18s ease, background 0.2s ease;
+    }
+
+    .sort-btn:hover {
+      background: #444;
+    }
+
+    .sort-btn.sort-hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .scale-control {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      background: #2d2d2d;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0 16px;
+      border-radius: 999px;
+      height: 48px;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    body.light-theme .scale-control {
+      background: #d8d8d8;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .zoom-icon {
+      width: 24px;
+      height: 24px;
+      display: block;
+      position: relative;
+      flex-shrink: 0;
+      font-size: 0;
+      color: var(--amber-soft);
+      user-select: none;
+    }
+
+    .zoom-icon::before,
+    .zoom-icon::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 17px;
+      height: 4px;
+      border-radius: 999px;
+      background: currentColor;
+      transform: translate(-50%, -50%);
+    }
+
+    .zoom-icon:last-child::after {
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+
+    .zoom-icon:first-child::after {
+      display: none;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 150px;
+      height: 24px;
+      accent-color: var(--amber);
+      cursor: pointer;
+      margin: 0;
+      display: block;
+      flex-shrink: 0;
+      background: transparent;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 999px;
+      background: var(--amber);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--amber);
+      margin-top: -7px;
+      border: none;
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 6px;
+      border-radius: 999px;
+      background: var(--amber);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border: none;
+      border-radius: 50%;
+      background: var(--amber);
+    }
+
+    .grid {
+      --card-size: 170px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(var(--card-size), 1fr));
+      gap: 24px;
+      align-items: start;
+      justify-items: stretch;
+      transition: grid-template-columns 0.35s ease, opacity 0.22s ease;
+    }
+
+    .view-fade {
+      opacity: 1;
+      transition: opacity 0.22s ease;
+    }
+
+    .view-fade.fading-out,
+    .view-fade.fading-in {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .card {
+      background: #181818;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+      width: 100%;
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    }
+
+    body.light-theme .card {
+      background: #181818;
+      border-color: rgba(255, 255, 255, 0.1);
+      width: 100%;
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 1 / 1;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(242, 160, 0, 0.7);
+    }
+
+    .clickable-card {
+      cursor: pointer;
+    }
+
+    .image-placeholder {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      flex: 1;
+      position: relative;
+      background: linear-gradient(135deg, #4f4f4f, #2f2f2f);
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,0.72);
+      font-size: 14px;
+      overflow: hidden;
+    }
+
+    .thumbnail-label {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      min-height: 22%;
+      max-height: 25%;
+      padding: clamp(8px, calc(var(--card-size) * 0.055), 14px);
+      background: rgba(0, 0, 0, 0.62);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: clamp(13px, calc(var(--card-size) * 0.085), 20px);
+      line-height: 1.12;
+      font-weight: 800;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.85);
+      overflow: hidden;
+      word-break: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .thumbnail-label span {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    body.light-theme .image-placeholder {
+      background: linear-gradient(135deg, #4f4f4f, #2f2f2f);
+      color: rgba(255,255,255,0.72);
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      flex: 1;
+    }
+
+    body.light-theme .image-placeholder.has-image {
+      background-size: cover !important;
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
+    }
+
+    body.light-theme .thumbnail-label {
+      background: rgba(0, 0, 0, 0.62);
+      color: #ffffff;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.85);
+      min-height: 22%;
+      max-height: 25%;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      padding: 34px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.055);
+      border: 1px dashed rgba(255,255,255,0.18);
+      color: #c5c5c5;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    body.light-theme .empty-state {
+      background: rgba(0,0,0,0.04);
+      border-color: rgba(0,0,0,0.16);
+      color: #555;
+    }
+
+    .card-content {
+      display: none;
+    }
+
+    .card h3 {
+      font-size: clamp(15px, calc(var(--card-size) * 0.1), 24px);
+      margin-bottom: 6px;
+      line-height: 1.15;
+      overflow: visible;
+    }
+
+    .card p {
+      color: #c5c5c5;
+      font-size: clamp(12px, calc(var(--card-size) * 0.075), 17px);
+      line-height: 1.35;
+      overflow: visible;
+    }
+
+    body.light-theme .card p {
+      color: #c5c5c5;
+    }
+
+    .image-placeholder.has-image {
+      background-size: cover !important;
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
+      color: transparent;
+    }
+
+    .large-photo-placeholder.has-image {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: transparent;
+    }
+
+    .gallery-thumb.has-image {
+      background-size: cover;
+      background-position: center;
+      color: transparent;
+    }
+
+    .developer-section {
+      min-height: auto;
+    }
+
+    .developer-form {
+      max-width: 920px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .developer-preview {
+      grid-column: 1 / -1;
+      height: 280px;
+      border-radius: 22px;
+      background: #555;
+      border: 1px solid rgba(255,255,255,0.12);
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,0.75);
+      font-size: 22px;
+      font-weight: 800;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .developer-form label {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: var(--amber-soft);
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .developer-form input,
+    .developer-form textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: #181818;
+      color: white;
+      border-radius: 14px;
+      padding: 13px 14px;
+      font-size: 15px;
+      font-family: inherit;
+    }
+
+    body.light-theme .developer-form input,
+    body.light-theme .developer-form textarea {
+      background: #f4f4f4;
+      color: #151515;
+      border-color: rgba(0,0,0,0.16);
+    }
+
+    .developer-path-label,
+    .developer-notes-label {
+      grid-column: 1 / -1;
+    }
+
+    .developer-form textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .developer-submit {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: #2d2d2d;
+      color: white;
+      border-radius: 999px;
+      padding: 14px 20px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .developer-submit:hover {
+      background: #444;
+    }
+
+    .developer-json-import {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: var(--amber-soft);
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .developer-secondary {
+      background: #4a1f1f;
+    }
+
+    .developer-secondary:hover {
+      background: #653030;
+    }
+
+    .developer-help {
+      align-self: center;
+      color: #c5c5c5;
+      font-size: 14px;
+    }
+
+    body.light-theme .developer-help {
+      color: #555;
+    }
+
+    .hidden-view {
+      display: none;
+    }
+
+    .hidden-view.active-view {
+      display: block;
+    }
+
+    .back-btn-wrapper {
+      position: absolute;
+      top: 50%;
+      left: 24px;
+      height: 48px;
+      transform: translateY(-50%);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      opacity: 1;
+      transition: opacity 0.22s ease;
+    }
+
+    .back-btn-wrapper.fading-out,
+    .back-btn-wrapper.fading-in {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .back-btn {
+      position: relative;
+      z-index: 10;
+      pointer-events: auto;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: #2d2d2d;
+      color: white;
+      padding: 0 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 48px;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.22s ease;
+    }
+
+    .back-btn:hover {
+      background: #444;
+      border-color: rgba(242, 160, 0, 0.7);
+    }
+
+    body.light-theme .back-btn {
+      background: #d8d8d8;
+      color: #151515;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .photo-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.86);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 26px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.28s ease, visibility 0s linear 0.28s;
+    }
+
+    .photo-modal.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition: opacity 0.28s ease, visibility 0s linear 0s;
+    }
+
+    body.light-theme .photo-modal {
+      background: rgba(244, 244, 244, 0.82);
+    }
+
+    body.light-theme .photo-viewer {
+      background: #f4f4f4;
+      border-color: rgba(0, 0, 0, 0.16);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22);
+    }
+
+    body.light-theme .large-photo-placeholder {
+      background: linear-gradient(135deg, rgba(0,0,0,0.08), rgba(0,0,0,0.02)), #d8d8d8;
+      color: rgba(0, 0, 0, 0.75);
+    }
+
+    body.light-theme .gallery-strip-wrap {
+      background: rgba(0, 0, 0, 0.055);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-theme .photo-info-panel {
+      background: #ffffff;
+      color: #151515;
+      border-left-color: rgba(0, 0, 0, 0.14);
+    }
+
+    body.light-theme .photo-info-panel .photo-subtitle {
+      color: #555;
+    }
+
+    body.light-theme .info-row {
+      border-top-color: rgba(0, 0, 0, 0.12);
+    }
+
+    body.light-theme .info-label,
+    body.light-theme .team-link,
+    body.light-theme .player-link,
+    body.light-theme .event-link {
+      color: #b87400;
+    }
+
+    body.light-theme .team-link:hover,
+    body.light-theme .player-link:hover,
+    body.light-theme .event-link:hover {
+      color: #151515;
+    }
+
+    .photo-viewer {
+      --viewer-radius: 28px;
+      --info-strip-width: 58px;
+      position: relative;
+      width: min(1400px, 96vw);
+      height: min(820px, 90vh);
+      background: #111;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--viewer-radius);
+      overflow: hidden;
+      display: flex;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
+    }
+
+    .photo-viewer::after {
+      display: none;
+    }
+
+    .large-photo-area {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 28px;
+    }
+
+    .large-photo-placeholder {
+      width: 100%;
+      flex: 1;
+      touch-action: pan-y;
+      min-height: 0;
+      border-radius: calc(var(--viewer-radius) - 6px);
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)), #5f5f5f;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: clamp(28px, 5vw, 64px);
+      font-weight: 800;
+      will-change: transform;
+    }
+
+    .gallery-strip-wrap {
+      position: relative;
+      height: 112px;
+      border-radius: calc(var(--viewer-radius) - 10px);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .gallery-strip {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 12px;
+      scrollbar-width: none;
+      cursor: grab;
+      user-select: none;
+      scroll-behavior: smooth;
+    }
+
+    .gallery-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .gallery-strip.dragging {
+      cursor: grabbing;
+      scroll-behavior: auto;
+    }
+
+    .gallery-strip.fade-left.fade-right {
+      -webkit-mask-image: linear-gradient(90deg, transparent 0, black 82px, black calc(100% - 82px), transparent 100%);
+      mask-image: linear-gradient(90deg, transparent 0, black 82px, black calc(100% - 82px), transparent 100%);
+    }
+
+    .gallery-strip.fade-left:not(.fade-right) {
+      -webkit-mask-image: linear-gradient(90deg, transparent 0, black 82px, black 100%);
+      mask-image: linear-gradient(90deg, transparent 0, black 82px, black 100%);
+    }
+
+    .gallery-strip.fade-right:not(.fade-left) {
+      -webkit-mask-image: linear-gradient(90deg, black 0, black calc(100% - 82px), transparent 100%);
+      mask-image: linear-gradient(90deg, black 0, black calc(100% - 82px), transparent 100%);
+    }
+
+    .gallery-thumb {
+      min-width: 42px;
+      width: 42px;
+      height: 76px;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      background: #666;
+      color: rgba(255,255,255,0.88);
+      cursor: pointer;
+      font-size: 0;
+      font-weight: 700;
+      display: block;
+      overflow: hidden;
+      flex: 0 0 auto;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: width 0.42s cubic-bezier(.22,.61,.36,1), min-width 0.42s cubic-bezier(.22,.61,.36,1), border-color 0.25s ease, transform 0.25s ease, background 0.25s ease, font-size 0.25s ease, padding 0.25s ease;
+    }
+
+    .gallery-thumb.active-thumb {
+      min-width: 118px;
+      width: 118px;
+      border-color: var(--amber);
+      background-color: #4f4f4f;
+      font-size: 12px;
+      padding: 0;
+    }
+
+    .gallery-thumb.has-image.active-thumb {
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .gallery-strip.dragging .gallery-thumb {
+      pointer-events: none;
+    }
+
+    .close-photo-btn {
+      position: absolute;
+      top: 14px;
+      right: calc(var(--info-strip-width) / 2);
+      transform: translateX(50%);
+      z-index: 20;
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.72);
+      color: white;
+      font-size: 26px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0 2px 0;
+      transition: background 0.2s ease;
+    }
+
+    .close-photo-btn:hover {
+      background: rgba(217, 0, 0, 0.85);
+    }
+
+    .gallery-arrow {
+      position: absolute;
+      top: calc((100% - 112px - 16px) / 2);
+      z-index: 9;
+      width: 58px;
+      height: 58px;
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.56);
+      color: white;
+      font-size: 38px;
+      line-height: 58px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: translateY(-50%);
+      opacity: 1;
+      transition: background 0.2s ease, transform 0.2s ease, opacity 0.35s ease;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .gallery-arrow-left {
+      left: 38px;
+      padding-bottom: 6px;
+      padding-left: 2px;
+    }
+
+    .gallery-arrow-right {
+      right: 430px;
+      padding-bottom: 6px;
+      padding-left: 3px;
+    }
+
+    .photo-viewer.info-hidden .gallery-arrow-right {
+      right: 96px;
+    }
+
+    .photo-viewer.arrows-idle .gallery-arrow {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .gallery-arrow.arrow-near {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .photo-info-panel {
+      position: relative;
+      flex: 0 0 calc(340px + var(--info-strip-width));
+      width: calc(340px + var(--info-strip-width));
+      max-width: calc(82vw + var(--info-strip-width));
+      background: #181818;
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 28px 28px 28px calc(32px + var(--info-strip-width));
+      overflow: hidden;
+      z-index: 12;
+      transition: flex-basis 0.35s ease, width 0.35s ease, max-width 0.35s ease, padding 0.35s ease, background 0.25s ease, border-color 0.25s ease;
+    }
+
+    .photo-viewer.info-hidden .photo-info-panel {
+      flex-basis: var(--info-strip-width);
+      width: var(--info-strip-width);
+      max-width: var(--info-strip-width);
+      padding: 0;
+      background: transparent;
+      border-left: 0;
+    }
+
+    .photo-viewer.info-hidden .photo-info-panel h2,
+    .photo-viewer.info-hidden .photo-info-panel .photo-subtitle,
+    .photo-viewer.info-hidden .photo-info-panel .info-row {
+      display: none;
+    }
+
+    .photo-viewer.info-hidden .info-toggle-btn,
+    .photo-viewer.info-hidden .info-download-btn,
+    .photo-viewer.info-hidden .photo-info-panel::before {
+      display: flex;
+    }
+
+    .info-toggle-btn {
+      position: absolute;
+      top: 92px;
+      left: 0;
+      width: var(--info-strip-width);
+      height: 58px;
+      border: none;
+      border-radius: 0;
+      background: #d88d00;
+      color: #111;
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: background 0.2s ease, color 0.2s ease;
+      z-index: 14;
+    }
+
+    .info-toggle-btn:hover {
+      background: #e59b10;
+    }
+
+    .info-download-btn {
+      position: absolute;
+      top: 156px;
+      left: 0;
+      width: var(--info-strip-width);
+      height: 58px;
+      border: none;
+      background: #d88d00;
+      color: #111;
+      font-size: 28px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: -8px 0 24px rgba(0,0,0,0.18);
+      transition: background 0.2s ease, color 0.2s ease;
+      z-index: 14;
+    }
+
+    .info-download-btn:hover {
+      background: #e59b10;
+    }
+
+    .download-icon {
+      position: relative;
+      display: block;
+      width: 24px;
+      height: 28px;
+    }
+
+    .download-icon::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 2px;
+      width: 6px;
+      height: 15px;
+      background: currentColor;
+      border-radius: 999px;
+      transform: translateX(-50%);
+    }
+
+    .download-icon::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 12px;
+      width: 12px;
+      height: 12px;
+      border-left: 5px solid currentColor;
+      border-bottom: 5px solid currentColor;
+      transform: translateX(-50%) rotate(-45deg);
+      box-sizing: border-box;
+    }
+
+    .photo-viewer.info-hidden .info-download-btn {
+      left: calc(var(--info-strip-width) * -1);
+    }
+
+    .photo-viewer.info-hidden .info-toggle-btn {
+      left: calc(var(--info-strip-width) * -1);
+    }
+
+    .photo-viewer.info-hidden .photo-info-panel::before {
+      border-radius: 0 var(--viewer-radius) var(--viewer-radius) 0;
+    }
+
+    .photo-viewer.info-hidden .close-photo-btn {
+      right: calc(var(--info-strip-width) / 2);
+      transform: translateX(50%);
+    }
+
+    .photo-info-panel h2 {
+      font-size: 26px;
+      margin-bottom: 6px;
+      padding-right: 18px;
+    }
+
+    .photo-info-panel .photo-subtitle {
+      color: #c5c5c5;
+      margin-bottom: 26px;
+      line-height: 1.45;
+    }
+
+    .info-row {
+      padding: 15px 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .info-label {
+      display: block;
+      color: var(--amber-soft);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      font-weight: 800;
+    }
+
+    .info-value {
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .team-link,
+    .player-link,
+    .event-link {
+      display: inline-block;
+      color: var(--amber-soft);
+      text-decoration: none;
+      font-weight: 700;
+      margin: 2px 0;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .team-link:hover,
+    .player-link:hover,
+    .event-link:hover {
+      color: var(--white);
+      transform: translateX(2px);
+    }
+
+    /* Final photo viewer strip/layout fixes */
+    .photo-info-panel::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: var(--info-strip-width);
+      background: #f2a000;
+      border-radius: 0 var(--viewer-radius) var(--viewer-radius) 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .photo-info-panel {
+      flex: 0 0 calc(340px + var(--info-strip-width));
+      width: calc(340px + var(--info-strip-width));
+      padding-left: calc(32px + var(--info-strip-width));
+    }
+
+    .photo-viewer.info-hidden .photo-info-panel {
+      flex: 0 0 var(--info-strip-width);
+      width: var(--info-strip-width);
+      max-width: var(--info-strip-width);
+      padding: 0;
+      background: transparent;
+      border-left: 0;
+      overflow: visible;
+    }
+
+    .photo-viewer.info-hidden .photo-info-panel h2,
+    .photo-viewer.info-hidden .photo-info-panel .photo-subtitle,
+    .photo-viewer.info-hidden .photo-info-panel .info-row {
+      display: none !important;
+    }
+
+    .photo-viewer.info-hidden .info-toggle-btn,
+    .photo-viewer.info-hidden .info-download-btn {
+      left: 0 !important;
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    .info-toggle-btn,
+    .info-download-btn {
+      left: 0 !important;
+    }
+
+    .close-photo-btn {
+      right: calc(var(--info-strip-width) / 2) !important;
+      left: auto !important;
+      transform: translateX(50%) !important;
+    }
+
+    @media (max-width: 760px) {
+      :root {
+        --top-height: 180px;
+        --top-height-scrolled: 92px;
+      }
+
+      html {
+        scroll-padding-top: calc(var(--top-height-scrolled) + 14px);
+      }
+
+      .top-bar {
+        padding: 0 14px;
+        background-position: center 38%;
+      }
+
+      .top-bar-content {
+        gap: 12px;
+        width: 92vw;
+      }
+
+      .top-bar h1 {
+        font-size: clamp(22px, 7vw, 34px);
+        white-space: normal;
+        line-height: 1.05;
+      }
+
+      .top-bar-logo {
+        width: 58px;
+      }
+
+      body.header-scrolled .top-bar-content {
+        transform: translateX(-50%) scale(0.78);
+      }
+
+      .sidebar {
+        top: auto !important;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 76px;
+        padding: 8px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        border-right: none;
+        border-top: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .sidebar.collapsed {
+        width: 100%;
+        padding: 8px;
+      }
+
+      .collapse-btn {
+        display: none;
+      }
+
+      .nav-link,
+      .sidebar.collapsed .nav-link {
+        width: 56px;
+        height: 56px;
+        min-height: 56px;
+        padding: 6px;
+        margin: 0;
+        border-radius: 18px;
+        justify-content: center;
+        gap: 0;
+      }
+
+      .icon-placeholder,
+      .sidebar.collapsed .icon-placeholder {
+        min-width: 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        font-size: 15px;
+      }
+
+      .nav-text,
+      .theme-text,
+      .sidebar.collapsed .nav-text,
+      .sidebar.collapsed .theme-text {
+        opacity: 0;
+        max-width: 0;
+      }
+
+      .sidebar-bottom {
+        width: auto;
+        margin: 0;
+        padding: 0;
+        border-top: none;
+      }
+
+      .theme-toggle,
+      .sidebar.collapsed .theme-toggle {
+        display: none;
+      }
+
+      .mobile-settings-toggle {
+        width: 56px;
+        height: 56px;
+        min-height: 56px;
+        padding: 0;
+        margin: 0;
+        border: none;
+        border-radius: 18px;
+        background: transparent;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        box-shadow: none;
+      }
+
+      body.light-theme .mobile-settings-toggle {
+        background: transparent;
+        color: #151515;
+      }
+
+      .settings-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #9a9a9a;
+        color: #ffffff;
+        font-size: 25px;
+        line-height: 1;
+        font-weight: 900;
+      }
+
+      body.light-theme .settings-icon {
+        background: #9a9a9a;
+        color: #ffffff;
+      }
+
+      .mobile-settings-menu {
+        position: fixed;
+        right: 10px;
+        bottom: 88px;
+        width: min(320px, calc(100vw - 20px));
+        padding: 14px;
+        border-radius: 20px;
+        background: rgba(20, 20, 20, 0.96);
+        border: 1px solid rgba(255,255,255,0.12);
+        box-shadow: 0 18px 55px rgba(0,0,0,0.45);
+        z-index: 40;
+        display: none;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .mobile-settings-menu.open {
+        display: flex;
+      }
+
+      body.light-theme .mobile-settings-menu {
+        background: rgba(245,245,245,0.98);
+        border-color: rgba(0,0,0,0.12);
+        box-shadow: 0 18px 45px rgba(0,0,0,0.22);
+      }
+
+      .mobile-theme-button {
+        height: 48px;
+        border: none;
+        border-radius: 999px;
+        background: #2d2d2d;
+        color: white;
+        font-weight: 800;
+        font-size: 15px;
+      }
+
+      body.light-theme .mobile-theme-button {
+        background: #d8d8d8;
+        color: #151515;
+      }
+
+      .mobile-size-control {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        height: 96px;
+        padding: 12px 16px;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.06);
+        color: var(--amber-soft);
+        font-weight: 800;
+      }
+
+      body.light-theme .mobile-size-control {
+        background: rgba(0,0,0,0.06);
+        color: #b87400;
+      }
+
+      .mobile-size-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        width: 100%;
+      }
+
+      .mobile-size-buttons button {
+        height: 42px;
+        border: none;
+        border-radius: 999px;
+        background: #2d2d2d;
+        color: #ffffff;
+        font-weight: 900;
+      }
+
+      .mobile-size-buttons button.active {
+        background: var(--amber);
+        color: #111111;
+      }
+
+      body.light-theme .mobile-size-buttons button {
+        background: #d8d8d8;
+        color: #151515;
+      }
+
+      body.light-theme .mobile-size-buttons button.active {
+        background: var(--amber);
+        color: #111111;
+      }
+
+      .theme-icon {
+        min-width: 42px;
+        width: 42px;
+        height: 42px;
+      }
+
+      .main-content,
+      .main-content.expanded {
+        margin-left: 0;
+        padding: calc(var(--top-height) + 14px) 10px 96px;
+      }
+
+      body.header-scrolled .main-content,
+      body.header-scrolled .main-content.expanded {
+        padding-top: calc(var(--top-height-scrolled) + 14px);
+      }
+
+      .section {
+        min-height: auto;
+        padding: 12px;
+        margin-bottom: 18px;
+        border-radius: 18px;
+        scroll-margin-top: calc(var(--top-height-scrolled) + 14px);
+      }
+
+      .section-header {
+        min-height: 86px;
+        padding: 12px;
+        border-radius: 26px;
+        justify-content: center;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .section-title {
+        position: relative;
+        left: auto;
+        transform: none;
+        width: 100%;
+        order: 1;
+      }
+
+      .section-title h2 {
+        font-size: clamp(26px, 8vw, 36px);
+      }
+
+      .controls {
+        order: 2;
+        width: 100%;
+        justify-content: center;
+        gap: 8px;
+        min-height: 0;
+      }
+
+      .scale-control {
+        display: none;
+      }
+
+      input[type="range"] {
+        width: 96px;
+      }
+
+      .sort-btn {
+        padding: 9px 12px;
+        font-size: 13px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .back-btn-wrapper {
+        position: relative;
+        top: auto;
+        left: auto;
+        height: auto;
+        transform: none;
+        align-self: flex-start;
+        order: 0;
+      }
+
+      .back-btn {
+        height: 38px;
+        padding: 0 12px;
+        font-size: 13px;
+      }
+
+      #yearDetailView.active-view .back-btn-wrapper,
+      #playerPhotosView.active-view .back-btn-wrapper,
+      #teamDetailView.active-view .back-btn-wrapper,
+      #extraDetailView.active-view .back-btn-wrapper {
+        position: relative;
+        top: auto;
+        right: auto;
+        left: auto;
+        transform: none;
+        align-self: center;
+        order: 2;
+        height: 38px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      #yearDetailView.active-view .section-header,
+      #playerPhotosView.active-view .section-header,
+      #teamDetailView.active-view .section-header,
+      #extraDetailView.active-view .section-header {
+        min-height: 86px;
+        flex-direction: column;
+        justify-content: center;
+        padding: 12px;
+        gap: 10px;
+      }
+
+      #yearDetailView.active-view .section-title,
+      #playerPhotosView.active-view .section-title,
+      #teamDetailView.active-view .section-title,
+      #extraDetailView.active-view .section-title {
+        position: relative;
+        left: auto;
+        transform: none;
+        width: 100%;
+        order: 1;
+      }
+
+      #yearDetailView.active-view .controls,
+      #playerPhotosView.active-view .controls,
+      #teamDetailView.active-view .controls,
+      #extraDetailView.active-view .controls {
+        display: none;
+      }
+
+      #yearDetailView.active-view .back-btn,
+      #playerPhotosView.active-view .back-btn,
+      #teamDetailView.active-view .back-btn,
+      #extraDetailView.active-view .back-btn {
+        height: 38px;
+        padding: 9px 12px;
+        font-size: 13px;
+        border-radius: 999px;
+        width: auto;
+        max-width: 280px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        justify-content: stretch;
+        gap: 10px;
+        --card-size: 130px;
+      }
+
+      body.mobile-large-icons .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      body.mobile-small-icons .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .card {
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        aspect-ratio: 1 / 1;
+      }
+
+      .thumbnail-label {
+        font-size: 13px;
+        padding: 7px;
+      }
+
+      .home-intro {
+        padding: 8px !important;
+        font-size: 16px !important;
+      }
+
+      .home-intro p:first-child {
+        font-size: 19px !important;
+      }
+
+      .photo-modal {
+        padding: 8px;
+        align-items: stretch;
+      }
+
+      .photo-viewer {
+        width: 100%;
+        height: calc(100dvh - 16px - env(safe-area-inset-bottom));
+        border-radius: 18px;
+        --viewer-radius: 18px;
+        --info-strip-width: 48px;
+      }
+
+      .large-photo-area {
+        padding: 12px calc(12px + var(--info-strip-width)) calc(18px + env(safe-area-inset-bottom)) 12px;
+        gap: 10px;
+      }
+
+      .large-photo-placeholder {
+        border-radius: 14px;
+        background-size: contain !important;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+
+      .gallery-strip-wrap {
+        height: 86px;
+        border-radius: 14px;
+        flex: 0 0 86px;
+      }
+
+      .gallery-strip {
+        justify-content: flex-start !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        touch-action: pan-x !important;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .gallery-thumb {
+        scroll-snap-align: center;
+        pointer-events: auto;
+      }
+
+      .gallery-thumb {
+        min-width: 36px;
+        width: 36px;
+        height: 60px;
+      }
+
+      .gallery-thumb.active-thumb {
+        min-width: 86px;
+        width: 86px;
+      }
+
+      .photo-info-panel {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: 100%;
+        flex: none;
+        padding: 70px 22px 22px calc(22px + var(--info-strip-width));
+        transform: translateX(0);
+        transition: transform 0.28s ease, background 0.25s ease;
+      }
+
+      .photo-viewer.info-hidden .photo-info-panel {
+        width: var(--info-strip-width);
+        max-width: var(--info-strip-width);
+        right: 0;
+        transform: translateX(0);
+        padding: 0;
+        background: transparent;
+        overflow: visible;
+      }
+
+      .photo-viewer:not(.info-hidden) .photo-info-panel {
+        background: #181818;
+      }
+
+      body.light-theme .photo-viewer:not(.info-hidden) .photo-info-panel {
+        background: #ffffff;
+      }
+
+      .photo-viewer:not(.info-hidden) .photo-info-panel::before {
+        border-radius: 0;
+      }
+
+      .photo-info-panel h2 {
+        font-size: 20px;
+      }
+
+      .info-row {
+        padding: 11px 0;
+      }
+
+      .info-toggle-btn {
+        top: 78px;
+        height: 50px;
+        width: var(--info-strip-width);
+      }
+
+      .info-download-btn {
+        top: 132px;
+        height: 50px;
+        width: var(--info-strip-width);
+      }
+
+      .close-photo-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 22px;
+      }
+
+      .gallery-arrow {
+        width: 46px;
+        height: 46px;
+        font-size: 32px;
+        line-height: 46px;
+      }
+
+      .gallery-arrow-left {
+        left: 18px;
+      }
+
+      .gallery-arrow-right {
+        right: 318px;
+      }
+
+      .photo-viewer.info-hidden .gallery-arrow-right {
+        right: 68px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        justify-content: stretch;
+        gap: 10px;
+      }
+
+      body.mobile-large-icons .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .controls {
+        flex-direction: column;
+      }
+
+      .scale-control,
+      .sort-btn {
+        width: 100%;
+        max-width: 280px;
+      }
+
+      .scale-control input[type="range"] {
+        flex: 1;
+        width: auto;
+      }
+
+      .photo-info-panel {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .gallery-arrow-right {
+        right: 288px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="top-bar">
+    <div class="top-bar-content">
+      <h1>Abercrave RFC Photo Vault</h1>
+      <img class="top-bar-logo" src="abercrave-logo.png" alt="Abercrave RFC Logo" />
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <button class="collapse-btn" id="collapseBtn">☰</button>
+
+    <a class="nav-link active" href="#home">
+      <span class="icon-placeholder">H</span>
+      <span class="nav-text">Welcome</span>
+    </a>
+
+    <a class="nav-link" href="#years">
+      <span class="icon-placeholder">S</span>
+      <span class="nav-text">Seasons</span>
+    </a>
+
+    <a class="nav-link" href="#people">
+      <span class="icon-placeholder">P</span>
+      <span class="nav-text">Players</span>
+    </a>
+
+    <a class="nav-link" href="#teams">
+      <span class="icon-placeholder">T</span>
+      <span class="nav-text">Teams</span>
+    </a>
+
+    <a class="nav-link" href="#extras">
+      <span class="icon-placeholder">E</span>
+      <span class="nav-text">Events</span>
+    </a>
+
+    <div class="sidebar-bottom">
+      <button class="theme-toggle" id="themeToggle" type="button">
+        <span class="theme-icon" id="themeIcon"><span class="theme-icon-inner"><svg width="28" height="28" viewBox="0 0 28 28" style="display:block;"><circle cx="14" cy="14" r="10" fill="white"></circle><circle cx="18" cy="12" r="10" fill="black"></circle></svg></span></span>
+        <span class="theme-text" id="themeText">Dark Mode</span>
+      </button>
+
+      <button class="mobile-settings-toggle" id="mobileSettingsToggle" type="button" aria-label="Open mobile settings">
+        <span class="settings-icon" aria-hidden="true">⚙</span>
+      </button>
+
+      <div class="mobile-settings-menu" id="mobileSettingsMenu" aria-hidden="true">
+        <button class="mobile-theme-button" id="mobileThemeButton" type="button">Dark Mode</button>
+        <div class="mobile-size-control">
+          <span style="width:100%; text-align:center; display:block;">Icon size</span>
+          <div class="mobile-size-buttons">
+            <button type="button" id="mobileSmallBtn" class="active">Small</button>
+            <button type="button" id="mobileLargeBtn">Large</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="mainContent">
+    <section class="section home-section" id="home">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Welcome</h2>
+        </div>
+      </div>
+
+      <div class="home-intro" style="max-width: 900px; margin: 0 auto; padding: 20px 10px 10px; line-height: 1.8; font-size: 18px;">
+        <p style="margin-bottom: 18px; font-size: 22px; font-weight: 700;">
+          Welcome to the Abercrave RFC Photo Vault.
+        </p>
+
+        <p class="home-copy" style="color: #c9c9c9;">
+          This archive is a place to explore the history of Abercrave RFC through photographs, player collections, team galleries, and memorable club events spanning decades of rugby memories.
+        </p>
+
+        <p class="home-copy" style="margin-top: 18px; color: #c9c9c9;">
+          Browse by year, player, team, or event to discover archived moments from matches, tours, celebrations, and club life.
+        </p>
+      </div>
+    </section>
+    <section class="section" id="years">
+      <div id="yearsListView">
+        <div class="back-btn-wrapper"></div>
+
+        <div class="section-header">
+          <div class="section-title">
+            <h2>Seasons</h2>
+            <p>Click a season to view its archive collection.</p>
+          </div>
+
+          <div class="controls">
+            <button class="sort-btn" data-grid="yearsGrid" data-sort="year">Sort: Newest</button>
+            <div class="scale-control">
+              <span class="zoom-icon">−</span>
+              <input type="range" min="130" max="280" value="170" data-target="yearsGrid" />
+              <span class="zoom-icon">+</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid view-fade" id="yearsGrid"></div>
+      </div>
+
+      <div id="yearDetailView" class="hidden-view">
+        <div class="section-header">
+          <div class="back-btn-wrapper">
+            <button class="back-btn" id="backToYears" type="button">← Back to Seasons</button>
+          </div>
+          <div class="section-title">
+            <h2 id="yearDetailTitle">Season Archive</h2>
+            <p id="yearDetailSubtitle">Placeholder archive collection.</p>
+          </div>
+
+          <div class="controls">
+            <div class="scale-control">
+              <span class="zoom-icon">−</span>
+              <input type="range" min="130" max="280" value="170" data-target="yearDetailGrid" />
+              <span class="zoom-icon">+</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid view-fade" id="yearDetailGrid"></div>
+      </div>
+    </section>
+
+    <section class="section" id="people">
+      <div id="playersListView" class="players-list-view">
+        <div class="back-btn-wrapper"></div>
+
+        <div class="section-header">
+          <div class="section-title">
+            <h2>Players</h2>
+            <p>Click a player to view their photo collection.</p>
+          </div>
+
+          <div class="controls">
+            <button class="sort-btn" data-grid="peopleGrid" data-sort="name">Sort: A-Z</button>
+            <div class="scale-control">
+              <span class="zoom-icon">−</span>
+              <input type="range" min="130" max="280" value="170" data-target="peopleGrid" />
+              <span class="zoom-icon">+</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid view-fade" id="peopleGrid"></div>
+      </div>
+
+      <div id="playerPhotosView" class="hidden-view">
+        <div class="section-header">
+          <div class="back-btn-wrapper">
+            <button class="back-btn" id="backToPlayers" type="button">← Back to Players</button>
+          </div>
+          <div class="section-title">
+            <h2 id="playerPhotosTitle">Player Photos</h2>
+            <p id="playerPhotosSubtitle">Placeholder photo collection.</p>
+          </div>
+
+          <div class="controls">
+            <div class="scale-control">
+              <span class="zoom-icon">−</span>
+              <input type="range" min="130" max="280" value="170" data-target="playerPhotosGrid" />
+              <span class="zoom-icon">+</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid view-fade" id="playerPhotosGrid"></div>
+      </div>
+    </section>
+
+    <section class="section" id="teams">
+      <div id="teamsListView">
+        <div class="back-btn-wrapper"></div>
+
+        <div class="section-header">
+          <div class="section-title">
+            <h2>Teams</h2>
+            <p>Click a team to view its archive collection.</p>
+          </div>
+
+          <div class="controls">
+            <button class="sort-btn" data-grid="teamsGrid" data-sort="name">Sort: A-Z</button>
+            <div class="scale-control">
+              <span class="zoom-icon">−</span>
+              <input type="range" min="130" max="280" value="170" data-target="teamsGrid" />
+              <span class="zoom-icon">+</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid view-fade" id="teamsGrid"></div>
+      </div>
+
+      <div id="teamDetailView" class="hidden-view">
+        <div class="section-header">
+          <div class="back-btn-wrapper">
+            <button class="back-btn" id="backToTeams" type="button">← Back to Teams</button>
+          </div>
+          <div class="section-title">
+            <h2 id="teamDetailTitle">Team Archive</h2>
+            <p id="teamDetailSubtitle">Placeholder team collection.</p>
+          </div>
+
+          <div class="controls">
+            <div class="scale-control">
+              <span class="zoom-icon">−</span>
+              <input type="range" min="130" max="280" value="170" data-target="teamDetailGrid" />
+              <span class="zoom-icon">+</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid view-fade" id="teamDetailGrid"></div>
+      </div>
+    </section>
+
+    <section class="section" id="extras">
+      <div id="extrasListView">
+        <div class="back-btn-wrapper"></div>
+
+        <div class="section-header">
+          <div class="section-title">
+            <h2>Events</h2>
+            <p>Click an event to view its archive collection.</p>
+          </div>
+
+          <div class="controls">
+            <button class="sort-btn" data-grid="extrasGrid" data-sort="year">Sort: Newest</button>
+            <div class="scale-control">
+              <span class="zoom-icon">−</span>
+              <input type="range" min="130" max="280" value="170" data-target="extrasGrid" />
+              <span class="zoom-icon">+</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid view-fade" id="extrasGrid"></div>
+      </div>
+
+      <div id="extraDetailView" class="hidden-view">
+        <div class="section-header">
+          <div class="back-btn-wrapper">
+            <button class="back-btn" id="backToExtras" type="button">← Back to Events</button>
+          </div>
+          <div class="section-title">
+            <h2 id="extraDetailTitle">Event Archive</h2>
+            <p id="extraDetailSubtitle">Placeholder event collection.</p>
+          </div>
+
+          <div class="controls">
+            <div class="scale-control">
+              <span class="zoom-icon">−</span>
+              <input type="range" min="130" max="280" value="170" data-target="extraDetailGrid" />
+              <span class="zoom-icon">+</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid view-fade" id="extraDetailGrid"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="photo-modal" id="photoModal" aria-hidden="true">
+    <div class="photo-viewer" id="photoViewer">
+      <button class="close-photo-btn" id="closePhotoBtn" type="button">×</button>
+      <button class="gallery-arrow gallery-arrow-left" id="galleryPrevBtn" type="button">‹</button>
+      <button class="gallery-arrow gallery-arrow-right" id="galleryNextBtn" type="button">›</button>
+
+      <div class="large-photo-area">
+        <div class="large-photo-placeholder" id="largePhotoPlaceholder">Image Placeholder</div>
+        <div class="gallery-strip-wrap" id="galleryStripWrap">
+          <div class="gallery-strip" id="galleryStrip"></div>
+        </div>
+      </div>
+
+      <aside class="photo-info-panel" id="photoInfoPanel">
+        <button class="info-toggle-btn" id="infoToggleBtn" type="button">›</button>
+        <button class="info-download-btn" id="downloadPhotoBtn" type="button" aria-label="Download photo">
+          <span class="download-icon"></span>
+        </button>
+        <h2 id="modalPhotoTitle">Photo Title</h2>
+        <p class="photo-subtitle" id="modalPhotoSubtitle" style="display:none;"></p>
+
+        <div class="info-row">
+          <span class="info-label">Date Taken</span>
+          <span class="info-value" id="modalDateTaken">Unknown</span>
+        </div>
+
+        <div class="info-row" id="modalSeasonRow">
+          <span class="info-label">Season</span>
+          <span class="info-value" id="modalSeason">Unknown</span>
+        </div>
+
+        <div class="info-row" id="modalPeopleRow">
+          <span class="info-label">People in Image</span>
+          <span class="info-value" id="modalPeople">Unknown</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Teams Playing</span>
+          <span class="info-value" id="modalTeams">Unknown</span>
+        </div>
+
+        <div class="info-row" id="modalEventRow">
+          <span class="info-label">Event</span>
+          <span class="info-value" id="modalEvent">Unknown</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Notes</span>
+          <span class="info-value" id="modalNotes">Placeholder notes for this archive photo.</span>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    window.ABERCRAVE_PHOTOS = [];
+  </script>
+
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    const mainContent = document.getElementById("mainContent");
+    const collapseBtn = document.getElementById("collapseBtn");
+    const navLinks = document.querySelectorAll(".nav-link");
+    const themeToggle = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
+    const themeText = document.getElementById("themeText");
+    const mobileSettingsToggle = document.getElementById("mobileSettingsToggle");
+    const mobileSettingsMenu = document.getElementById("mobileSettingsMenu");
+    const mobileThemeButton = document.getElementById("mobileThemeButton");
+    const mobileSmallBtn = document.getElementById("mobileSmallBtn");
+    const mobileLargeBtn = document.getElementById("mobileLargeBtn");
+    const yearsListView = document.getElementById("yearsListView");
+    const yearDetailView = document.getElementById("yearDetailView");
+    const backToYears = document.getElementById("backToYears");
+    const yearDetailTitle = document.getElementById("yearDetailTitle");
+    const yearDetailSubtitle = document.getElementById("yearDetailSubtitle");
+    const teamsListView = document.getElementById("teamsListView");
+    const teamDetailView = document.getElementById("teamDetailView");
+    const backToTeams = document.getElementById("backToTeams");
+    const teamDetailTitle = document.getElementById("teamDetailTitle");
+    const teamDetailSubtitle = document.getElementById("teamDetailSubtitle");
+    const extrasListView = document.getElementById("extrasListView");
+    const extraDetailView = document.getElementById("extraDetailView");
+    const backToExtras = document.getElementById("backToExtras");
+    const extraDetailTitle = document.getElementById("extraDetailTitle");
+    const extraDetailSubtitle = document.getElementById("extraDetailSubtitle");
+    const playersListView = document.getElementById("playersListView");
+    const playerPhotosView = document.getElementById("playerPhotosView");
+    const backToPlayers = document.getElementById("backToPlayers");
+    const playerPhotosTitle = document.getElementById("playerPhotosTitle");
+    const playerPhotosSubtitle = document.getElementById("playerPhotosSubtitle");
+    const photoModal = document.getElementById("photoModal");
+    const photoViewer = document.getElementById("photoViewer");
+    const closePhotoBtn = document.getElementById("closePhotoBtn");
+    const infoToggleBtn = document.getElementById("infoToggleBtn");
+    const downloadPhotoBtn = document.getElementById("downloadPhotoBtn");
+    const largePhotoPlaceholder = document.getElementById("largePhotoPlaceholder");
+    const modalPhotoTitle = document.getElementById("modalPhotoTitle");
+    const modalPhotoSubtitle = document.getElementById("modalPhotoSubtitle");
+    const modalEventRow = document.getElementById("modalEventRow");
+    const modalDateTaken = document.getElementById("modalDateTaken");
+    const modalSeasonRow = document.getElementById("modalSeasonRow");
+    const modalSeason = document.getElementById("modalSeason");
+    const modalPeopleRow = document.getElementById("modalPeopleRow");
+    const modalPeople = document.getElementById("modalPeople");
+    const modalTeams = document.getElementById("modalTeams");
+    const modalEvent = document.getElementById("modalEvent");
+    const modalNotes = document.getElementById("modalNotes");
+    const galleryStripWrap = document.getElementById("galleryStripWrap");
+    const galleryStrip = document.getElementById("galleryStrip");
+    const galleryPrevBtn = document.getElementById("galleryPrevBtn");
+    const galleryNextBtn = document.getElementById("galleryNextBtn");
+    
+    let activeGalleryItems = [];
+    let activeGalleryIndex = 0;
+    let galleryArrowIdleTimer;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+    let isGalleryDragging = false;
+    let galleryDragStartX = 0;
+    let galleryDragStartScrollLeft = 0;
+    let galleryHasDragged = false;
+    let galleryPointerDownThumb = null;
+    let isPhotoAnimating = false;
+    let currentModalPhoto = null;
+    let photoSwipeStartX = 0;
+    let photoSwipeStartY = 0;
+    let photoSwipePointerId = null;
+    let photoSwipeTracking = false;
+    let isScrollingToHome = false;
+    let homeScrollReleaseTimer = null;
+
+    collapseBtn?.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+      mainContent.classList.toggle("expanded");
+    });
+
+    function scrollToSection(sectionId) {
+      const section = document.querySelector(sectionId);
+      if (!section) return;
+
+      const isHome = sectionId === "#home";
+
+      if (isHome) {
+        isScrollingToHome = true;
+        clearTimeout(homeScrollReleaseTimer);
+        document.body.classList.remove("header-scrolled");
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+
+        function keepHeaderExpandedUntilTop() {
+          document.body.classList.remove("header-scrolled");
+
+          if (window.scrollY <= 4) {
+            isScrollingToHome = false;
+            updateHeaderScrollState();
+            return;
+          }
+
+          homeScrollReleaseTimer = setTimeout(keepHeaderExpandedUntilTop, 40);
+        }
+
+        keepHeaderExpandedUntilTop();
+        return;
+      }
+
+      document.body.classList.add("header-scrolled");
+
+      requestAnimationFrame(() => {
+        const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--top-height-scrolled"), 10) || 135;
+        const extraGap = window.matchMedia("(max-width: 760px)").matches ? 58 : 30;
+        const sectionTop = section.getBoundingClientRect().top + window.pageYOffset;
+        const targetTop = sectionTop - headerHeight - extraGap;
+
+        window.scrollTo({
+          top: Math.max(0, targetTop),
+          behavior: "smooth"
+        });
+      });
+    }
+
+    navLinks.forEach(link => {
+      link?.addEventListener("click", event => {
+        event.preventDefault();
+        navLinks.forEach(item => item.classList.remove("active"));
+        link.classList.add("active");
+        scrollToSection(link.getAttribute("href"));
+      });
+    });
+
+    function toggleThemeMode() {
+      const currentIcon = themeIcon.querySelector(".theme-icon-inner");
+      if (currentIcon) currentIcon.classList.add("sky-swipe-out");
+
+      setTimeout(() => {
+        document.body.classList.toggle("light-theme");
+        const lightMode = document.body.classList.contains("light-theme");
+
+        themeIcon.innerHTML = lightMode
+          ? '<span class="theme-icon-inner"><span style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;font-size:28px;line-height:1;color:var(--amber);">☀</span></span>'
+          : '<span class="theme-icon-inner"><svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="10" fill="white"></circle><circle cx="18" cy="12" r="10" fill="black"></circle></svg></span>';
+
+        themeIcon.style.transform = lightMode ? "translateY(0px)" : "translateY(-1px)";
+        themeText.textContent = lightMode ? "Light Mode" : "Dark Mode";
+        if (mobileThemeButton) mobileThemeButton.textContent = lightMode ? "Light Mode" : "Dark Mode";
+      }, 240);
+    }
+
+    themeToggle?.addEventListener("click", toggleThemeMode);
+    mobileThemeButton?.addEventListener("click", toggleThemeMode);
+
+    mobileSettingsToggle?.addEventListener("click", () => {
+      const isOpen = mobileSettingsMenu.classList.toggle("open");
+      mobileSettingsMenu.setAttribute("aria-hidden", isOpen ? "false" : "true");
+    });
+
+    function closeMobileSettingsMenu() {
+      if (!mobileSettingsMenu) return;
+      mobileSettingsMenu.classList.remove("open");
+      mobileSettingsMenu.setAttribute("aria-hidden", "true");
+    }
+
+    document.addEventListener("click", event => {
+      if (!mobileSettingsMenu || !mobileSettingsToggle) return;
+      if (!mobileSettingsMenu.classList.contains("open")) return;
+      if (mobileSettingsMenu.contains(event.target) || mobileSettingsToggle.contains(event.target)) return;
+      closeMobileSettingsMenu();
+    });
+
+    window.addEventListener("scroll", () => {
+      if (!window.matchMedia("(max-width: 760px)").matches) return;
+      if (!mobileSettingsMenu?.classList.contains("open")) return;
+      closeMobileSettingsMenu();
+    }, { passive: true });
+
+    const years = [];
+
+    const people = [];
+
+    const teams = [];
+
+    const extras = [];
+
+    const sortState = {
+      yearsGrid: "newest",
+      peopleGrid: "az",
+      teamsGrid: "az",
+      extrasGrid: "newest"
+    };
+
+    const currentItems = {
+      yearsGrid: [...years].sort((a, b) => b.year - a.year),
+      peopleGrid: [...people].sort((a, b) => a.name.localeCompare(b.name)),
+      teamsGrid: teams,
+      extrasGrid: [...extras].sort((a, b) => b.year - a.year),
+      yearDetailGrid: [],
+      playerPhotosGrid: [],
+      teamDetailGrid: [],
+      extraDetailGrid: []
+    };
+
+    let savedPhotos = [];
+
+    function clearOldBrowserTestData() {
+      localStorage.removeItem("abercraveSavedPhotos");
+    }
+
+    async function loadPhotosJsonFile() {
+      try {
+        const response = await fetch("photos.json", { cache: "no-store" });
+        if (!response.ok) throw new Error("photos.json not found");
+
+        const photosFromJson = await response.json();
+        if (!Array.isArray(photosFromJson)) throw new Error("photos.json must contain an array");
+
+        savedPhotos = normalisePhotoArray(photosFromJson);
+        refreshMainIndexes();
+      } catch (error) {
+        savedPhotos = [];
+        refreshMainIndexes();
+        console.warn(error);
+      }
+    }
+
+    function normaliseText(value) {
+      return String(value || "").toLowerCase().trim();
+    }
+
+    function splitList(value) {
+      if (Array.isArray(value)) return value.map(entry => String(entry).trim()).filter(Boolean);
+
+      return String(value || "")
+        .replaceAll(String.fromCharCode(13), ",")
+        .replaceAll(String.fromCharCode(10), ",")
+        .split(/,| vs /i)
+        .map(entry => entry.trim())
+        .filter(Boolean);
+    }
+
+    function getPhotoImage(photo) {
+      return photo.imageSrc || photo.image || photo.file || photo.path || photo.src || "";
+    }
+
+    function getPhotoPeople(photo) {
+      return photo.peopleInImage || photo.players || photo.people || photo.playerNames || "";
+    }
+
+    function getPhotoTeams(photo) {
+      return photo.teamsPlaying || photo.teams || photo.team || "";
+    }
+
+    function getPhotoEvent(photo) {
+      const rawEvent = photo.event || photo.eventName || "";
+      const cleanEvent = String(rawEvent).trim();
+      return cleanEvent.toLowerCase() === "archive" ? "" : cleanEvent;
+    }
+
+    function getPhotoSeason(photo) {
+      const rawSeason = photo.season || photo.Season || photo.year || "";
+      const cleanSeason = String(rawSeason).trim();
+      if (cleanSeason) return cleanSeason;
+
+      const dateText = String(photo.dateTaken || photo.date || "");
+      const yearMatch = dateText.match(/[0-9]{4}/);
+      if (!yearMatch) return "";
+
+      const year = Number(yearMatch[0]);
+      return `${year}/${year + 1}`;
+    }
+
+    function getSeasonStartYear(season) {
+      const match = String(season || "").match(/[0-9]{4}/);
+      return match ? Number(match[0]) : 0;
+    }
+
+    function normalisePhoto(photo) {
+      const season = getPhotoSeason(photo);
+      const imageSrc = getPhotoImage(photo);
+      const peopleInImage = splitList(getPhotoPeople(photo)).join(", ");
+      const teamsPlaying = splitList(getPhotoTeams(photo)).join(" vs ");
+      const event = getPhotoEvent(photo);
+
+      return {
+        ...photo,
+        title: photo.title || photo.name || "Untitled Archive Photo",
+        subtitle: photo.subtitle || event || "Archive photo",
+        dateTaken: photo.dateTaken || photo.date || "Unknown",
+        year: season,
+        season,
+        peopleInImage: peopleInImage || "Unknown",
+        teamsPlaying: teamsPlaying || "Unknown",
+        event: event || "",
+        notes: photo.notes || photo.description || "",
+        imageSrc
+      };
+    }
+
+    function normalisePhotoArray(photos) {
+      return (Array.isArray(photos) ? photos : []).map(normalisePhoto);
+    }
+
+    function getPhotosForYear(season) {
+      const target = normaliseText(season);
+      return savedPhotos.filter(photo => normaliseText(getPhotoSeason(photo)) === target);
+    }
+
+    function getPhotosForPlayer(playerName) {
+      const target = normaliseText(playerName);
+      return savedPhotos.filter(photo => splitList(getPhotoPeople(photo)).some(person => normaliseText(person) === target));
+    }
+
+    function getPhotosForTeam(teamName) {
+      const target = normaliseText(teamName);
+      return savedPhotos.filter(photo => splitList(getPhotoTeams(photo)).some(team => normaliseText(team) === target));
+    }
+
+    function getPhotosForEvent(eventName) {
+      const target = normaliseText(eventName);
+      return savedPhotos.filter(photo => normaliseText(getPhotoEvent(photo)) === target || normaliseText(photo.subtitle) === target);
+    }
+
+    function getPhotoSortTime(photo) {
+      const dateText = String(photo.dateTaken || photo.date || "").trim();
+      const parsed = Date.parse(dateText);
+      if (!Number.isNaN(parsed)) return parsed;
+
+      const parts = dateText.match(/[0-9]+/g) || [];
+      if (parts.length >= 3) {
+        const first = Number(parts[0]);
+        const second = Number(parts[1]);
+        const year = Number(String(parts[2]).length === 2 ? `20${parts[2]}` : parts[2]);
+        const hour = Number(parts[3] || 0);
+        const minute = Number(parts[4] || 0);
+        const day = first > 12 ? first : second > 12 ? second : first;
+        const month = first > 12 ? second : second > 12 ? first : second;
+        return new Date(year, month - 1, day, hour, minute).getTime();
+      }
+
+      return getSeasonStartYear(getPhotoSeason(photo)) * 10000000000;
+    }
+
+    function sortPhotosByDateThenSeason(photos) {
+      return [...photos].sort((a, b) => getPhotoSortTime(b) - getPhotoSortTime(a));
+    }
+
+    function latestPhotoWithImage(photos) {
+      return sortPhotosByDateThenSeason(photos).find(photo => getPhotoImage(photo)) || photos[0] || null;
+    }
+
+    function mergeByTitle(defaultItems, dynamicItems) {
+      const merged = [...defaultItems];
+      const existingTitles = new Set(defaultItems.map(item => normaliseText(item.title)));
+
+      dynamicItems.forEach(item => {
+        if (!existingTitles.has(normaliseText(item.title))) {
+          merged.push(item);
+          existingTitles.add(normaliseText(item.title));
+        }
+      });
+
+      return merged;
+    }
+
+    function buildYearItems() {
+      const savedYearItems = [...new Set(savedPhotos
+        .map(photo => getPhotoSeason(photo))
+        .filter(Boolean))]
+        .map(season => {
+          const matchingPhotos = getPhotosForYear(season);
+          const latestPhoto = latestPhotoWithImage(matchingPhotos);
+
+          return {
+            title: String(season),
+            subtitle: `${matchingPhotos.length} photo${matchingPhotos.length === 1 ? "" : "s"}`,
+            year: getSeasonStartYear(season),
+            season,
+            imageSrc: latestPhoto ? getPhotoImage(latestPhoto) : ""
+          };
+        });
+
+      return mergeByTitle(years, savedYearItems).sort((a, b) => getSeasonStartYear(b.season || b.title) - getSeasonStartYear(a.season || a.title));
+    }
+
+    function buildPlayerItems() {
+      const playerNames = [...new Set(savedPhotos
+        .flatMap(photo => splitList(getPhotoPeople(photo)))
+        .filter(name => {
+          const clean = normaliseText(name);
+          return clean && clean !== "unknown";
+        }))];
+
+      const savedPlayerItems = playerNames.map(name => {
+        const matchingPhotos = getPhotosForPlayer(name);
+        const latestPhoto = latestPhotoWithImage(matchingPhotos);
+
+        return {
+          title: name,
+          subtitle: `${matchingPhotos.length} photo${matchingPhotos.length === 1 ? "" : "s"}`,
+          name,
+          imageSrc: latestPhoto ? getPhotoImage(latestPhoto) : ""
+        };
+      });
+
+      return mergeByTitle(people, savedPlayerItems).sort((a, b) => (a.name || a.title).localeCompare(b.name || b.title));
+    }
+
+    function buildTeamItems() {
+      const teamNames = [...new Set(savedPhotos.flatMap(photo => splitList(getPhotoTeams(photo))))];
+      const savedTeamItems = teamNames.map(team => {
+        const matchingPhotos = getPhotosForTeam(team);
+        const latestPhoto = latestPhotoWithImage(matchingPhotos);
+
+        return {
+          title: team,
+          subtitle: `${matchingPhotos.length} photo${matchingPhotos.length === 1 ? "" : "s"}`,
+          imageSrc: latestPhoto ? getPhotoImage(latestPhoto) : ""
+        };
+      });
+
+      return mergeByTitle(teams, savedTeamItems).sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    function buildEventItems() {
+      const eventNames = [...new Set(savedPhotos.map(photo => getPhotoEvent(photo)).filter(Boolean))];
+      const savedEventItems = eventNames.map(eventName => {
+        const matchingPhotos = getPhotosForEvent(eventName);
+        const newestYear = matchingPhotos.reduce((latest, photo) => Math.max(latest, getSeasonStartYear(getPhotoSeason(photo))), 0);
+        const latestPhoto = latestPhotoWithImage(matchingPhotos);
+
+        return {
+          title: eventName,
+          subtitle: `${matchingPhotos.length} photo${matchingPhotos.length === 1 ? "" : "s"}`,
+          year: newestYear || new Date().getFullYear(),
+          imageSrc: latestPhoto ? getPhotoImage(latestPhoto) : ""
+        };
+      });
+
+      return mergeByTitle(extras, savedEventItems).sort((a, b) => b.year - a.year);
+    }
+
+    function refreshMainIndexes() {
+      const previousSortState = { ...sortState };
+
+      currentItems.yearsGrid = buildYearItems();
+      currentItems.peopleGrid = buildPlayerItems();
+      currentItems.teamsGrid = buildTeamItems();
+      currentItems.extrasGrid = buildEventItems();
+
+      if (previousSortState.yearsGrid === "oldest") currentItems.yearsGrid.reverse();
+      if (previousSortState.peopleGrid === "za") currentItems.peopleGrid.reverse();
+      if (previousSortState.teamsGrid === "za") currentItems.teamsGrid.reverse();
+      if (previousSortState.extrasGrid === "oldest") currentItems.extrasGrid.reverse();
+
+      renderGrid("yearsGrid", currentItems.yearsGrid);
+      renderGrid("peopleGrid", currentItems.peopleGrid);
+      renderGrid("teamsGrid", currentItems.teamsGrid);
+      renderGrid("extrasGrid", currentItems.extrasGrid);
+    }
+
+    function photosOnly(realPhotos) {
+      return realPhotos;
+    }
+
+    function withPlaceholders(realPhotos, title, label, amount = 24) {
+      return photosOnly(realPhotos);
+    }
+
+    function formatThumbnailLabel(value) {
+      return String(value || "Archive Photo").replaceAll("/", " / ").replaceAll("  ", " ").trim();
+    }
+
+    function createCard(item, gridId = "") {
+      const isClickableCard = ["yearsGrid", "peopleGrid", "teamsGrid", "extrasGrid"].includes(gridId);
+      const cardImage = getPhotoImage(item);
+      const imageStyle = cardImage ? `style="background-image:url('${cardImage}')"` : "";
+      const imageClass = cardImage ? "image-placeholder has-image" : "image-placeholder";
+
+      return `
+        <article class="card ${isClickableCard ? "clickable-card" : ""}" data-title="${item.title}">
+          <div class="${imageClass}" ${imageStyle}>
+            ${cardImage ? "" : "Image Placeholder"}
+            <div class="thumbnail-label"><span>${formatThumbnailLabel(item.title)}</span></div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderGrid(gridId, items) {
+      const grid = document.getElementById(gridId);
+      currentItems[gridId] = items;
+
+      if (!items || items.length === 0) {
+        grid.innerHTML = `<div class="empty-state">No photos have been added here yet.<br>Add entries to photos.json using the separate JSON compiler page.</div>`;
+        return;
+      }
+
+      grid.innerHTML = items.map(item => createCard(item, gridId)).join("");
+    }
+
+    function animateReorder(grid, updateFunction) {
+      const firstPositions = new Map();
+      [...grid.children].forEach(card => {
+        firstPositions.set(card.dataset.title, card.getBoundingClientRect());
+      });
+
+      updateFunction();
+
+      [...grid.children].forEach(card => {
+        const first = firstPositions.get(card.dataset.title);
+        const last = card.getBoundingClientRect();
+
+        if (!first) return;
+
+        const deltaX = first.left - last.left;
+        const deltaY = first.top - last.top;
+
+        card.animate([
+          { transform: `translate(${deltaX}px, ${deltaY}px)` },
+          { transform: "translate(0, 0)" }
+        ], {
+          duration: 420,
+          easing: "cubic-bezier(.22,.61,.36,1)"
+        });
+      });
+    }
+
+    function sortAndRender(gridId, type) {
+      let source;
+
+      if (gridId === "yearsGrid") source = buildYearItems();
+      if (gridId === "peopleGrid") source = buildPlayerItems();
+      if (gridId === "teamsGrid") source = buildTeamItems();
+      if (gridId === "extrasGrid") source = buildEventItems();
+
+      if (type === "year") {
+        const newest = sortState[gridId] === "newest";
+        source.sort((a, b) => newest ? getSeasonStartYear(b.season || b.title) - getSeasonStartYear(a.season || a.title) : getSeasonStartYear(a.season || a.title) - getSeasonStartYear(b.season || b.title));
+      }
+
+      if (type === "name") {
+        const az = sortState[gridId] === "az";
+        source.sort((a, b) => az ? (a.name || a.title).localeCompare(b.name || b.title) : (b.name || b.title).localeCompare(a.name || a.title));
+      }
+
+      const grid = document.getElementById(gridId);
+      animateReorder(grid, () => renderGrid(gridId, source));
+    }
+
+    document.querySelectorAll(".sort-btn").forEach(button => {
+      button?.addEventListener("click", () => {
+        const gridId = button.dataset.grid;
+        const sortType = button.dataset.sort;
+
+        if (sortType === "year") {
+          sortState[gridId] = sortState[gridId] === "newest" ? "oldest" : "newest";
+          button.textContent = sortState[gridId] === "newest" ? "Sort: Newest" : "Sort: Oldest";
+        }
+
+        if (sortType === "name") {
+          sortState[gridId] = sortState[gridId] === "az" ? "za" : "az";
+          button.textContent = sortState[gridId] === "az" ? "Sort: A-Z" : "Sort: Z-A";
+        }
+
+        sortAndRender(gridId, sortType);
+      });
+    });
+
+    let globalCardSize = window.matchMedia("(max-width: 760px)").matches ? 130 : 170;
+
+    function applyGlobalCardSize(value) {
+      globalCardSize = Number(value) || (window.matchMedia("(max-width: 760px)").matches ? 130 : 170);
+
+      document.querySelectorAll(".grid").forEach(grid => {
+        grid.style.setProperty("--card-size", `${globalCardSize}px`);
+      });
+
+      document.querySelectorAll("input[type='range'][data-target]").forEach(slider => {
+        slider.value = globalCardSize;
+      });
+
+      
+    }
+
+    document.querySelectorAll("input[type='range'][data-target]").forEach(slider => {
+      slider?.addEventListener("input", () => {
+        applyGlobalCardSize(slider.value);
+      });
+    });
+
+    function setMobileIconSize(mode) {
+      const large = mode === "large";
+      document.body.classList.toggle("mobile-large-icons", large);
+      document.body.classList.toggle("mobile-small-icons", !large);
+      mobileSmallBtn?.classList.toggle("active", !large);
+      mobileLargeBtn?.classList.toggle("active", large);
+    }
+
+    mobileSmallBtn?.addEventListener("click", () => setMobileIconSize("small"));
+    mobileLargeBtn?.addEventListener("click", () => setMobileIconSize("large"));
+    setMobileIconSize("small");
+
+    applyGlobalCardSize(globalCardSize);
+
+    function createPlaceholderCollection(title, label, amount = 24) {
+      return [];
+    }
+
+    function fadeControlsOut(container) {
+      const sortButton = container.querySelector(".sort-btn");
+      if (!sortButton) return;
+      sortButton.classList.add("sort-hidden");
+    }
+
+    function fadeControlsIn(container) {
+      const sortButton = container.querySelector(".sort-btn");
+      if (!sortButton) return;
+
+      requestAnimationFrame(() => {
+        sortButton.classList.remove("sort-hidden");
+      });
+    }
+
+    function fadeGridOut(container) {
+      const grid = container.querySelector(".grid");
+      const backButton = container.querySelector(".back-btn-wrapper");
+
+      if (grid) {
+        grid.classList.remove("fading-in");
+        grid.classList.add("fading-out");
+      }
+
+      if (backButton && backButton.children.length > 0) {
+        backButton.classList.remove("fading-in");
+        backButton.classList.add("fading-out");
+      }
+    }
+
+    function fadeGridIn(container) {
+      const grid = container.querySelector(".grid");
+      const backButton = container.querySelector(".back-btn-wrapper");
+
+      if (grid) {
+        grid.classList.remove("fading-out");
+        grid.classList.add("fading-in");
+      }
+
+      if (backButton && backButton.children.length > 0) {
+        backButton.classList.remove("fading-out");
+        backButton.classList.add("fading-in");
+      }
+
+      setTimeout(() => {
+        if (grid) grid.classList.remove("fading-in");
+        if (backButton) backButton.classList.remove("fading-in");
+      }, 30);
+    }
+
+    function openDetailView(sectionId, listView, detailView, titleElement, subtitleElement, gridId, title, subtitle, label) {
+      titleElement.textContent = title;
+      subtitleElement.textContent = subtitle;
+
+      let realPhotos = [];
+      if (gridId === "yearDetailGrid") realPhotos = getPhotosForYear(title);
+      if (gridId === "extraDetailGrid") realPhotos = getPhotosForEvent(title);
+
+      renderGrid(gridId, sortPhotosByDateThenSeason(realPhotos));
+
+      fadeControlsOut(listView);
+      fadeGridOut(listView);
+
+      setTimeout(() => {
+        listView.classList.add("hidden-view");
+        detailView.classList.add("active-view");
+        fadeControlsIn(detailView);
+        fadeGridIn(detailView);
+      }, 220);
+      scrollToSection(`#${sectionId}`);
+    }
+
+    function closeDetailView(sectionId, listView, detailView) {
+      fadeControlsOut(detailView);
+      fadeGridOut(detailView);
+
+      setTimeout(() => {
+        detailView.classList.remove("active-view");
+        listView.classList.remove("hidden-view");
+        fadeControlsIn(listView);
+        fadeGridIn(listView);
+      }, 220);
+      scrollToSection(`#${sectionId}`);
+    }
+
+    function openPlayerPhotos(playerName) {
+      const photoItems = sortPhotosByDateThenSeason(getPhotosForPlayer(playerName));
+
+      playerPhotosTitle.textContent = playerName;
+      playerPhotosSubtitle.textContent = `Photo collection for ${playerName}.`;
+      renderGrid("playerPhotosGrid", photoItems);
+
+      fadeControlsOut(playersListView);
+      fadeGridOut(playersListView);
+
+      setTimeout(() => {
+        playersListView.classList.add("hidden-view");
+        playerPhotosView.classList.add("active-view");
+        fadeControlsIn(playerPhotosView);
+        fadeGridIn(playerPhotosView);
+      }, 220);
+      scrollToSection("#people");
+    }
+
+    backToPlayers?.addEventListener("click", () => {
+      fadeControlsOut(playerPhotosView);
+      fadeGridOut(playerPhotosView);
+
+      setTimeout(() => {
+        playerPhotosView.classList.remove("active-view");
+        playersListView.classList.remove("hidden-view");
+        fadeControlsIn(playersListView);
+        fadeGridIn(playersListView);
+      }, 220);
+      scrollToSection("#people");
+    });
+
+    function findMatchingTeamName(teamName) {
+      return teamName;
+    }
+
+    function openTeamArchive(teamName) {
+      const matchedTeamName = findMatchingTeamName(teamName);
+
+      fadeControlsOut(teamsListView);
+      fadeGridOut(teamsListView);
+
+      setTimeout(() => {
+        teamsListView.classList.add("hidden-view");
+        teamDetailView.classList.add("active-view");
+        fadeControlsIn(teamDetailView);
+        fadeGridIn(teamDetailView);
+      }, 220);
+      teamDetailTitle.textContent = matchedTeamName;
+      teamDetailSubtitle.textContent = `Archive collection for ${matchedTeamName}.`;
+      renderGrid("teamDetailGrid", sortPhotosByDateThenSeason(getPhotosForTeam(matchedTeamName)));
+
+      navLinks.forEach(item => item.classList.remove("active"));
+      document.querySelector('a[href="#teams"]').classList.add("active");
+      scrollToSection("#teams");
+    }
+
+    function updateGalleryEdgeFades() {
+      const canScroll = galleryStrip.scrollWidth > galleryStrip.clientWidth + 2;
+      const canScrollLeft = canScroll && galleryStrip.scrollLeft > 4;
+      const canScrollRight = canScroll && galleryStrip.scrollLeft < galleryStrip.scrollWidth - galleryStrip.clientWidth - 4;
+
+      galleryStrip.classList.toggle("fade-left", canScrollLeft);
+      galleryStrip.classList.toggle("fade-right", canScrollRight);
+      galleryStrip.style.justifyContent = canScroll ? "flex-start" : "center";
+    }
+
+    function renderGalleryThumbs(forceRebuild = false) {
+      const existingThumbs = galleryStrip.querySelectorAll(".gallery-thumb");
+
+      if (forceRebuild || existingThumbs.length !== activeGalleryItems.length) {
+        galleryStrip.innerHTML = activeGalleryItems.map((item, index) => `
+          <button class="gallery-thumb ${getPhotoImage(item) ? "has-image" : ""}" data-gallery-index="${index}" type="button" ${getPhotoImage(item) ? `style="background-image:url('${getPhotoImage(item)}')"` : ""}>
+            ${item.title}
+          </button>
+        `).join("");
+      }
+
+      galleryStrip.querySelectorAll(".gallery-thumb").forEach((thumb, index) => {
+        thumb.classList.toggle("active-thumb", index === activeGalleryIndex);
+      });
+
+      const activeThumb = galleryStrip.querySelector(".active-thumb");
+      if (activeThumb) {
+        window.requestAnimationFrame(() => {
+          if (!window.matchMedia("(max-width: 760px)").matches) {
+            activeThumb.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+          }
+          setTimeout(updateGalleryEdgeFades, 260);
+        });
+      }
+
+      updateGalleryEdgeFades();
+    }
+
+    function updatePhotoContent(item) {
+      const infoWasHidden = photoViewer.classList.contains("info-hidden");
+      photoViewer.classList.toggle("info-hidden", infoWasHidden);
+      largePhotoPlaceholder.textContent = item.title || "Image Placeholder";
+      const modalImage = getPhotoImage(item);
+      largePhotoPlaceholder.classList.toggle("has-image", Boolean(modalImage));
+      largePhotoPlaceholder.style.backgroundImage = modalImage ? `url('${modalImage}')` : "";
+      modalPhotoTitle.textContent = item.title || "Archive Photo";
+      modalPhotoSubtitle.textContent = "";
+      modalDateTaken.textContent = item.dateTaken || "Unknown";
+
+      const seasonName = getPhotoSeason(item);
+      if (seasonName) {
+        modalSeasonRow.style.display = "block";
+        modalSeason.innerHTML = `<a href="#years" class="event-link" data-season-link="${seasonName}">${formatThumbnailLabel(seasonName)}</a>`;
+      } else {
+        modalSeasonRow.style.display = "none";
+        modalSeason.textContent = "";
+      }
+      const peopleList = splitList(getPhotoPeople(item)).filter(person => {
+        const clean = normaliseText(person);
+        return clean && clean !== "unknown";
+      });
+
+      if (peopleList.length) {
+        modalPeopleRow.style.display = "block";
+
+        modalPeople.innerHTML = peopleList.map(person =>
+          `<a href="#people" class="player-link" data-player-link="${person}">${person}</a>`
+        ).join("<br>");
+      } else {
+        modalPeopleRow.style.display = "none";
+        modalPeople.textContent = "";
+      }
+      const teamList = splitList(getPhotoTeams(item));
+      if (teamList.length) {
+        const splitTeams = teamList;
+        modalTeams.innerHTML = splitTeams.map(team =>
+          `<a href="#teams" class="team-link" data-team-link="${team}">${team}</a>`
+        ).join("<br><span style='opacity:0.45;'>vs</span><br>");
+      } else {
+        modalTeams.textContent = "Unknown";
+      }
+      const eventName = getPhotoEvent(item);
+      if (eventName && eventName !== "Archive") {
+        modalEventRow.style.display = "block";
+        modalEvent.innerHTML = `<a href="#extras" class="event-link" data-event-link="${eventName}">${eventName}</a>`;
+      } else {
+        modalEventRow.style.display = "none";
+        modalEvent.textContent = "";
+      }
+
+      modalNotes.textContent = item.notes || "Placeholder notes for this archive photo.";
+
+      if (infoWasHidden) {
+        photoViewer.classList.add("info-hidden");
+        infoToggleBtn.textContent = "‹";
+      } else {
+        photoViewer.classList.remove("info-hidden");
+        infoToggleBtn.textContent = "›";
+      }
+    }
+
+    async function showGalleryItem(index, animate = false) {
+      if (!activeGalleryItems.length || isPhotoAnimating) return;
+
+      if (index < 0) index = 0;
+      if (index >= activeGalleryItems.length) {
+        index = activeGalleryItems.length - 1;
+      }
+
+      if (index === activeGalleryIndex && animate) return;
+
+      const previousIndex = activeGalleryIndex;
+      const direction = index > previousIndex ? "next" : "previous";
+      const outDistance = direction === "next" ? "-100%" : "100%";
+      const inDistance = direction === "next" ? "100%" : "-100%";
+
+      activeGalleryIndex = index;
+      const item = activeGalleryItems[activeGalleryIndex];
+      currentModalPhoto = item;
+
+      galleryPrevBtn.style.display = activeGalleryIndex === 0 ? "none" : "flex";
+      galleryNextBtn.style.display = activeGalleryIndex === activeGalleryItems.length - 1 ? "none" : "flex";
+      renderGalleryThumbs();
+
+      largePhotoPlaceholder.getAnimations().forEach(animation => animation.cancel());
+      largePhotoPlaceholder.style.transform = "translateX(0)";
+
+      if (!animate) {
+        updatePhotoContent(item);
+        return;
+      }
+
+      isPhotoAnimating = true;
+
+      try {
+        await largePhotoPlaceholder.animate(
+          [
+            { transform: "translateX(0)" },
+            { transform: `translateX(${outDistance})` }
+          ],
+          {
+            duration: 260,
+            easing: "cubic-bezier(.22,.61,.36,1)",
+            fill: "forwards"
+          }
+        ).finished;
+
+        updatePhotoContent(item);
+        largePhotoPlaceholder.style.transform = `translateX(${inDistance})`;
+
+        await largePhotoPlaceholder.animate(
+          [
+            { transform: `translateX(${inDistance})` },
+            { transform: "translateX(0)" }
+          ],
+          {
+            duration: 260,
+            easing: "cubic-bezier(.22,.61,.36,1)",
+            fill: "forwards"
+          }
+        ).finished;
+      } finally {
+        largePhotoPlaceholder.style.transform = "translateX(0)";
+        if (photoViewer.classList.contains("info-hidden")) infoToggleBtn.textContent = "‹";
+        isPhotoAnimating = false;
+      }
+    }
+
+    function moveGallery(direction) {
+      showGalleryItem(activeGalleryIndex + direction, true);
+    }
+
+    function isMouseNearElement(element, mouseX, mouseY, distance = 90) {
+      if (!element || element.style.display === "none") return false;
+
+      const rect = element.getBoundingClientRect();
+      const closestX = Math.max(rect.left, Math.min(mouseX, rect.right));
+      const closestY = Math.max(rect.top, Math.min(mouseY, rect.bottom));
+      const deltaX = mouseX - closestX;
+      const deltaY = mouseY - closestY;
+
+      return Math.sqrt(deltaX * deltaX + deltaY * deltaY) <= distance;
+    }
+
+    function updateArrowProximity(mouseX = lastMouseX, mouseY = lastMouseY) {
+      lastMouseX = mouseX;
+      lastMouseY = mouseY;
+
+      [galleryPrevBtn, galleryNextBtn].forEach(button => {
+        if (isMouseNearElement(button, mouseX, mouseY)) {
+          button.classList.add("arrow-near");
+        } else {
+          button.classList.remove("arrow-near");
+        }
+      });
+    }
+
+    function resetGalleryArrowIdleTimer() {
+      photoViewer.classList.remove("arrows-idle");
+      clearTimeout(galleryArrowIdleTimer);
+      galleryArrowIdleTimer = setTimeout(() => {
+        photoViewer.classList.add("arrows-idle");
+        galleryPrevBtn.classList.remove("arrow-near");
+        galleryNextBtn.classList.remove("arrow-near");
+      }, 2000);
+    }
+
+    function openPhotoModal(item, galleryItems = null) {
+      const isMobileViewer = window.matchMedia("(max-width: 760px)").matches;
+      photoViewer.classList.toggle("info-hidden", isMobileViewer);
+      infoToggleBtn.textContent = isMobileViewer ? "‹" : "›";
+      activeGalleryItems = galleryItems && galleryItems.length ? galleryItems : [item];
+      activeGalleryIndex = Math.max(0, activeGalleryItems.findIndex(entry => entry.title === item.title));
+      renderGalleryThumbs(true);
+      showGalleryItem(activeGalleryIndex, false);
+      photoModal.classList.add("open");
+      photoModal.setAttribute("aria-hidden", "false");
+      resetGalleryArrowIdleTimer();
+    }
+
+    function closePhotoModal() {
+      clearTimeout(galleryArrowIdleTimer);
+      photoViewer.classList.remove("arrows-idle");
+      photoModal.classList.remove("open");
+      photoModal.setAttribute("aria-hidden", "true");
+    }
+
+    closePhotoBtn?.addEventListener("click", closePhotoModal);
+
+    photoModal?.addEventListener("click", event => {
+      if (event.target === photoModal) closePhotoModal();
+    });
+
+    downloadPhotoBtn?.addEventListener("click", async () => {
+      if (!currentModalPhoto) return;
+
+      const imagePath = getPhotoImage(currentModalPhoto);
+      if (!imagePath) return;
+
+      const filename = imagePath.split("/").pop() || "photo.jpg";
+
+      try {
+        const response = await fetch(imagePath);
+        const blob = await response.blob();
+        const file = new File([blob], filename, { type: blob.type || "image/jpeg" });
+        const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+        if (isMobileDevice && navigator.share) {
+          try {
+            if (navigator.canShare?.({ files: [file] })) {
+              await navigator.share({
+                files: [file],
+                title: currentModalPhoto.title || "Photo"
+              });
+              return;
+            }
+
+            await navigator.share({
+              title: currentModalPhoto.title || "Photo",
+              url: new URL(imagePath, window.location.href).href
+            });
+            return;
+          } catch (shareError) {
+            if (shareError.name === "AbortError") return;
+            console.warn("Share failed, falling back to download", shareError);
+          }
+        }
+
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = objectUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      } catch (error) {
+        console.warn("Unable to download/share image", error);
+      }
+    });
+
+    infoToggleBtn?.addEventListener("click", () => {
+      photoViewer.classList.toggle("info-hidden");
+      const hidden = photoViewer.classList.contains("info-hidden");
+      infoToggleBtn.textContent = hidden ? "‹" : "›";
+    });
+
+    galleryPrevBtn?.addEventListener("click", () => {
+      moveGallery(-1);
+      resetGalleryArrowIdleTimer();
+    });
+
+    galleryNextBtn?.addEventListener("click", () => {
+      moveGallery(1);
+      resetGalleryArrowIdleTimer();
+    });
+
+    photoViewer?.addEventListener("mousemove", event => {
+      updateArrowProximity(event.clientX, event.clientY);
+      resetGalleryArrowIdleTimer();
+    });
+
+    photoViewer?.addEventListener("mouseleave", () => {
+      photoViewer.classList.add("arrows-idle");
+      galleryPrevBtn.classList.remove("arrow-near");
+      galleryNextBtn.classList.remove("arrow-near");
+      clearTimeout(galleryArrowIdleTimer);
+    });
+
+    galleryPrevBtn?.addEventListener("mouseenter", () => galleryPrevBtn.classList.add("arrow-near"));
+    galleryNextBtn?.addEventListener("mouseenter", () => galleryNextBtn.classList.add("arrow-near"));
+
+    galleryStrip?.addEventListener("pointerdown", event => {
+      if (window.matchMedia("(max-width: 760px)").matches) return;
+      isGalleryDragging = true;
+      galleryHasDragged = false;
+      galleryPointerDownThumb = event.target.closest(".gallery-thumb");
+      galleryDragStartX = event.clientX;
+      galleryDragStartScrollLeft = galleryStrip.scrollLeft;
+      galleryStrip.classList.add("dragging");
+      galleryStrip.setPointerCapture(event.pointerId);
+    });
+
+    galleryStrip?.addEventListener("pointermove", event => {
+      if (!isGalleryDragging) return;
+
+      const movement = event.clientX - galleryDragStartX;
+      if (Math.abs(movement) > 4) galleryHasDragged = true;
+      galleryStrip.scrollLeft = galleryDragStartScrollLeft - movement;
+      updateGalleryEdgeFades();
+    });
+
+    function stopGalleryDrag(event) {
+      if (!isGalleryDragging) return;
+      isGalleryDragging = false;
+      galleryStrip.classList.remove("dragging");
+
+      if (event?.pointerId !== undefined && galleryStrip.hasPointerCapture(event.pointerId)) {
+        galleryStrip.releasePointerCapture(event.pointerId);
+      }
+
+      if (!galleryHasDragged && galleryPointerDownThumb) {
+        const newIndex = Number(galleryPointerDownThumb.dataset.galleryIndex);
+        if (newIndex !== activeGalleryIndex) {
+          showGalleryItem(newIndex, true);
+          resetGalleryArrowIdleTimer();
+        }
+      }
+
+      galleryPointerDownThumb = null;
+    }
+
+    galleryStrip?.addEventListener("pointerup", stopGalleryDrag);
+    galleryStrip?.addEventListener("pointercancel", stopGalleryDrag);
+    galleryStrip?.addEventListener("pointerleave", stopGalleryDrag);
+
+    galleryStrip?.addEventListener("scroll", updateGalleryEdgeFades);
+
+    window?.addEventListener("resize", updateGalleryEdgeFades);
+
+    galleryStrip?.addEventListener("click", event => {
+      if (window.matchMedia("(max-width: 760px)").matches) {
+        const thumb = event.target.closest(".gallery-thumb");
+        if (!thumb) return;
+        const newIndex = Number(thumb.dataset.galleryIndex);
+        if (newIndex !== activeGalleryIndex) {
+          showGalleryItem(newIndex, true);
+          resetGalleryArrowIdleTimer();
+        }
+        return;
+      }
+
+      event.preventDefault();
+    });
+
+    largePhotoPlaceholder?.addEventListener("pointerdown", event => {
+      if (!window.matchMedia("(max-width: 760px)").matches) return;
+      if (!photoModal.classList.contains("open")) return;
+
+      photoSwipeStartX = event.clientX;
+      photoSwipeStartY = event.clientY;
+      photoSwipePointerId = event.pointerId;
+      photoSwipeTracking = true;
+      largePhotoPlaceholder.setPointerCapture?.(event.pointerId);
+    });
+
+    largePhotoPlaceholder?.addEventListener("pointerup", event => {
+      if (!photoSwipeTracking || event.pointerId !== photoSwipePointerId) return;
+
+      const deltaX = event.clientX - photoSwipeStartX;
+      const deltaY = event.clientY - photoSwipeStartY;
+      photoSwipeTracking = false;
+
+      if (largePhotoPlaceholder.hasPointerCapture?.(event.pointerId)) {
+        largePhotoPlaceholder.releasePointerCapture(event.pointerId);
+      }
+
+      if (Math.abs(deltaX) < 55 || Math.abs(deltaX) < Math.abs(deltaY) * 1.25) return;
+
+      if (deltaX < 0) {
+        moveGallery(1);
+      } else {
+        moveGallery(-1);
+      }
+
+      resetGalleryArrowIdleTimer();
+    });
+
+    largePhotoPlaceholder?.addEventListener("pointercancel", event => {
+      photoSwipeTracking = false;
+      if (largePhotoPlaceholder.hasPointerCapture?.(event.pointerId)) {
+        largePhotoPlaceholder.releasePointerCapture(event.pointerId);
+      }
+    });
+
+    modalPeople?.addEventListener("click", event => {
+      const link = event.target.closest(".player-link");
+      if (!link) return;
+
+      event.preventDefault();
+      closePhotoModal();
+      openPlayerPhotos(link.dataset.playerLink);
+
+      navLinks.forEach(item => item.classList.remove("active"));
+      document.querySelector('a[href="#people"]').classList.add("active");
+    });
+
+    modalTeams?.addEventListener("click", event => {
+      const link = event.target.closest(".team-link");
+      if (!link) return;
+
+      event.preventDefault();
+      closePhotoModal();
+      openTeamArchive(link.dataset.teamLink);
+    });
+
+    modalSeason?.addEventListener("click", event => {
+      const link = event.target.closest("[data-season-link]");
+      if (!link) return;
+
+      event.preventDefault();
+      closePhotoModal();
+
+      openDetailView(
+        "years",
+        yearsListView,
+        yearDetailView,
+        yearDetailTitle,
+        yearDetailSubtitle,
+        "yearDetailGrid",
+        link.dataset.seasonLink,
+        `Archive collection for the ${formatThumbnailLabel(link.dataset.seasonLink)} season.`,
+        "Photo"
+      );
+
+      navLinks.forEach(item => item.classList.remove("active"));
+      document.querySelector('a[href="#years"]').classList.add("active");
+    });
+
+    modalEvent?.addEventListener("click", event => {
+      const link = event.target.closest(".event-link");
+      if (!link) return;
+
+      event.preventDefault();
+      closePhotoModal();
+      openDetailView(
+        "extras",
+        extrasListView,
+        extraDetailView,
+        extraDetailTitle,
+        extraDetailSubtitle,
+        "extraDetailGrid",
+        link.dataset.eventLink,
+        `Archive collection for ${link.dataset.eventLink}.`,
+        "Photo"
+      );
+
+      navLinks.forEach(item => item.classList.remove("active"));
+      document.querySelector('a[href="#extras"]').classList.add("active");
+    });
+
+    document?.addEventListener("keydown", event => {
+      if (!photoModal.classList.contains("open")) return;
+
+      if (event.key === "Escape") closePhotoModal();
+      if (event.key === "ArrowLeft") {
+        moveGallery(-1);
+        resetGalleryArrowIdleTimer();
+      }
+
+      if (event.key === "ArrowRight") {
+        moveGallery(1);
+        resetGalleryArrowIdleTimer();
+      }
+    });
+
+    function attachPhotoGridClick(gridId) {
+      document.getElementById(gridId)?.addEventListener("click", event => {
+        const card = event.target.closest(".card");
+        if (!card || card.classList.contains("clickable-card")) return;
+        const item = currentItems[gridId]?.find(entry => entry.title === card.dataset.title);
+        if (item) openPhotoModal(item, currentItems[gridId]);
+      });
+    }
+
+    ["yearDetailGrid", "playerPhotosGrid", "teamDetailGrid", "extraDetailGrid"].forEach(attachPhotoGridClick);
+
+    document.getElementById("yearsGrid")?.addEventListener("click", event => {
+      const card = event.target.closest(".clickable-card");
+      if (!card) return;
+      openDetailView(
+        "years",
+        yearsListView,
+        yearDetailView,
+        yearDetailTitle,
+        yearDetailSubtitle,
+        "yearDetailGrid",
+        card.dataset.title,
+        `Archive collection for the ${card.dataset.title} season.`,
+        "Photo"
+      );
+    });
+
+    backToYears?.addEventListener("click", () => {
+      closeDetailView("years", yearsListView, yearDetailView);
+    });
+
+    document.getElementById("peopleGrid")?.addEventListener("click", event => {
+      const card = event.target.closest(".clickable-card");
+      if (!card) return;
+      openPlayerPhotos(card.dataset.title);
+    });
+
+    document.getElementById("teamsGrid")?.addEventListener("click", event => {
+      const card = event.target.closest(".clickable-card");
+      if (!card) return;
+      openTeamArchive(card.dataset.title);
+    });
+
+    backToTeams?.addEventListener("click", () => {
+      closeDetailView("teams", teamsListView, teamDetailView);
+    });
+
+    document.getElementById("extrasGrid")?.addEventListener("click", event => {
+      const card = event.target.closest(".clickable-card");
+      if (!card) return;
+      openDetailView(
+        "extras",
+        extrasListView,
+        extraDetailView,
+        extraDetailTitle,
+        extraDetailSubtitle,
+        "extraDetailGrid",
+        card.dataset.title,
+        `Archive collection for ${card.dataset.title}.`,
+        "Photo"
+      );
+    });
+
+    backToExtras?.addEventListener("click", () => {
+      closeDetailView("extras", extrasListView, extraDetailView);
+    });
+
+    function updateHeaderScrollState() {
+      if (isScrollingToHome) {
+        document.body.classList.remove("header-scrolled");
+        return;
+      }
+
+      document.body.classList.toggle("header-scrolled", window.scrollY > 80);
+    }
+
+    window?.addEventListener("scroll", updateHeaderScrollState, { passive: true });
+    updateHeaderScrollState();
+
+    clearOldBrowserTestData();
+    loadPhotosJsonFile();
+
+    
+  </script>
+</body>
+</html>
